@@ -1,0 +1,2965 @@
+<!DOCTYPE html>
+<html lang="ta">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>ஊழியர் மேலாண்மை | Staff Manager</title>
+<link rel="manifest" href="manifest.json">
+<link rel="icon" type="image/png" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<meta name="theme-color" content="#4F46E5">
+
+<!-- Fonts: Inter (premium display/body — Linear/Stripe-grade), Hind Madurai (Tamil-script fallback so Tamil text never breaks) -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Hind+Madurai:wght@400;500;600;700&display=swap" rel="stylesheet">
+<!-- Material Symbols Rounded (icon system) -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,300..600,0..1,-25..0" rel="stylesheet">
+
+<!-- Supabase JS v2 -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+
+<!-- PDF + Chart + QR -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+
+<style>
+/* ============================= DESIGN TOKENS ============================= */
+:root{
+  --areca-50:#EEF2FF;
+  --areca-100:#E0E7FF;
+  --areca-500:#4F46E5;
+  --areca-600:#4338CA;
+  --areca-700:#3730A3;
+  --secondary:#7C3AED;
+  --accent:#06B6D4;
+  --success:#22C55E;
+  --success-50:#DCFCE7;
+  --marigold:#F59E0B;
+  --marigold-dark:#D97706;
+  --vermilion:#EF4444;
+  --vermilion-50:#FEE2E2;
+  --ink:#0F172A;
+  --paper:#F8FAFC;
+  --paper-dim:#F1F5F9;
+  --card:#FFFFFF;
+  --glass:rgba(255,255,255,.72);
+  --line:#E2E8F0;
+  --muted:#64748B;
+  --radius-lg:24px;
+  --radius-md:20px;
+  --radius-sm:16px;
+  --shadow-soft:0 4px 20px rgba(15,23,42,.06);
+  --shadow-lift:0 16px 40px rgba(79,70,229,.25);
+  --font-display:'Inter','Hind Madurai',sans-serif;
+  --font-body:'Inter','Hind Madurai',sans-serif;
+  --font-num:'Inter','Hind Madurai',sans-serif;
+}
+[data-theme="dark"]{
+  --paper:#0B0F1A;
+  --paper-dim:#111627;
+  --card:#161B2C;
+  --glass:rgba(22,27,44,.68);
+  --line:rgba(255,255,255,.08);
+  --ink:#F1F5F9;
+  --muted:#94A3B8;
+  --areca-50:rgba(79,70,229,.18);
+  --success-50:rgba(34,197,94,.15);
+  --vermilion-50:rgba(239,68,68,.15);
+  --shadow-soft:0 4px 20px rgba(0,0,0,.35);
+  --shadow-lift:0 16px 40px rgba(79,70,229,.35);
+}
+*{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
+html,body{margin:0;padding:0;height:100%;}
+body{
+  font-family:var(--font-body);
+  background:var(--paper);
+  color:var(--ink);
+  min-height:100vh;
+  overflow-x:hidden;
+  transition:background .3s ease, color .3s ease;
+  -webkit-font-smoothing:antialiased;
+}
+h1,h2,h3,h4,.display{font-family:var(--font-display); font-weight:700; letter-spacing:-.2px;}
+.num{font-family:var(--font-num); font-variant-numeric:tabular-nums;}
+button{font-family:inherit; cursor:pointer;}
+input,select,textarea{font-family:inherit;}
+::-webkit-scrollbar{width:0;height:0;}
+
+/* Material Symbols icon system */
+.material-symbols-rounded{
+  font-variation-settings:'FILL' 1,'wght' 500,'GRAD' 0,'opsz' 24;
+  vertical-align:middle; line-height:1; user-select:none;
+}
+
+/* ============================= LOGIN SCREEN ============================= */
+#loginScreen{
+  min-height:100vh;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  align-items:center;
+  padding:28px 20px;
+  background:
+    radial-gradient(circle at 15% -10%, rgba(6,182,212,.35), transparent 45%),
+    radial-gradient(circle at 100% 10%, rgba(124,58,237,.4), transparent 50%),
+    linear-gradient(160deg, var(--areca-700), var(--areca-500) 60%, var(--secondary));
+}
+.login-brand{
+  text-align:center;
+  color:#fff;
+  margin-bottom:26px;
+}
+.login-brand .mark{
+  width:76px;height:76px;border-radius:24px;
+  background:linear-gradient(145deg, var(--accent), #22D3EE);
+  display:flex;align-items:center;justify-content:center;
+  font-size:36px;margin:0 auto 16px;
+  box-shadow:0 16px 40px rgba(6,182,212,.4);
+}
+.login-brand h1{font-size:27px;margin:0 0 4px; font-weight:800;}
+.login-brand p{margin:0;opacity:.88;font-size:14px;}
+.login-card{
+  width:100%;max-width:400px;
+  background:rgba(255,255,255,0.92);
+  border-radius:var(--radius-lg);
+  padding:26px 22px 24px;
+  box-shadow:0 24px 60px rgba(30,20,80,.35);
+  backdrop-filter:blur(20px) saturate(160%);
+  -webkit-backdrop-filter:blur(20px) saturate(160%);
+  border:1px solid rgba(255,255,255,.5);
+}
+[data-theme="dark"] .login-card{ background:rgba(22,27,44,.88); border-color:rgba(255,255,255,.08); }
+.tabs{display:flex; background:var(--paper-dim); border-radius:999px; padding:4px; margin-bottom:18px;}
+.tabs button{flex:1; border:none; background:transparent; padding:11px 0; border-radius:999px; font-weight:600; color:var(--muted); font-size:14px; display:flex; align-items:center; justify-content:center; gap:6px; transition:.2s;}
+.tabs button.active{background:linear-gradient(135deg,var(--areca-500),var(--secondary)); color:#fff; box-shadow:0 6px 16px rgba(79,70,229,.35);}
+.field{margin-bottom:14px;}
+.field label{display:block; font-size:12.5px; font-weight:600; color:var(--muted); margin-bottom:6px;}
+.field input, .field select{
+  width:100%; padding:13px 14px; border-radius:var(--radius-sm);
+  border:1.5px solid var(--line); background:var(--card); color:var(--ink); font-size:14.5px;
+  outline:none; transition:border-color .15s, box-shadow .15s;
+}
+.field input:focus, .field select:focus{border-color:var(--areca-500); box-shadow:0 0 0 4px rgba(79,70,229,.12);}
+.row-between{display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; font-size:13px;}
+.chk{display:flex; align-items:center; gap:6px; color:var(--muted);}
+.link{color:var(--areca-500); font-weight:600; text-decoration:none; background:none; border:none; font-size:13px; padding:0;}
+.btn-primary{
+  width:100%; padding:14px; border:none; border-radius:var(--radius-sm);
+  background:linear-gradient(135deg, var(--areca-500), var(--secondary));
+  color:#fff; font-weight:700; font-size:15px; box-shadow:0 10px 24px rgba(79,70,229,.35);
+  display:flex; align-items:center; justify-content:center; gap:8px;
+  transition:transform .15s ease, box-shadow .15s ease;
+}
+.btn-primary:active{transform:scale(.97); box-shadow:0 4px 12px rgba(79,70,229,.3);}
+.btn-primary:disabled{opacity:.6;}
+.btn-secondary{
+  width:100%; padding:13px; border-radius:var(--radius-sm); margin-top:10px;
+  background:var(--paper-dim); border:1.5px solid var(--line); color:var(--ink); font-weight:600; font-size:14px;
+  display:flex; align-items:center; justify-content:center; gap:8px; transition:.15s;
+}
+.btn-secondary:active{transform:scale(.97);}
+.form-error{color:var(--vermilion); font-size:12.5px; margin:-6px 0 12px; min-height:0;}
+.pw-wrap{position:relative;}
+.pw-wrap input{padding-right:44px; width:100%;}
+.eye-toggle{
+  position:absolute; right:4px; top:50%; transform:translateY(-50%);
+  background:none; border:none; color:var(--muted);
+  padding:6px 10px; line-height:1; display:flex; align-items:center;
+}
+
+/* ============================= APP SHELL ============================= */
+#app{display:none; min-height:100vh; padding-bottom:92px;}
+header.topbar{
+  background:linear-gradient(120deg, var(--areca-700), var(--areca-500) 55%, var(--secondary));
+  color:#fff; padding:18px 18px 52px; position:relative; overflow:hidden;
+}
+header.topbar::after{
+  content:''; position:absolute; right:-40px; top:-60px; width:220px; height:220px;
+  background:radial-gradient(circle, rgba(6,182,212,.4), transparent 70%);
+}
+header.topbar::before{
+  content:''; position:absolute; left:-30px; bottom:-60px; width:180px; height:180px;
+  background:radial-gradient(circle, rgba(124,58,237,.35), transparent 70%);
+}
+.topbar-row{display:flex; justify-content:space-between; align-items:center; position:relative; z-index:1;}
+.brand-mini{display:flex; align-items:center; gap:10px;}
+.brand-mini .logo-chip{
+  width:42px;height:42px;border-radius:14px;background:rgba(255,255,255,.18);
+  display:flex;align-items:center;justify-content:center;font-size:20px; overflow:hidden;
+  backdrop-filter:blur(8px);
+}
+.brand-mini img{width:100%;height:100%;object-fit:cover;}
+.brand-mini .co-name{font-family:var(--font-display); font-size:16.5px; font-weight:700;}
+.brand-mini .co-sub{font-size:11px; opacity:.82;}
+.topbar-actions{display:flex; gap:8px;}
+.icon-btn{
+  width:38px;height:38px;border-radius:13px;border:none;
+  background:rgba(255,255,255,.18); color:#fff;
+  display:flex;align-items:center;justify-content:center;
+  backdrop-filter:blur(8px); transition:transform .15s;
+}
+.icon-btn:active{transform:scale(.92);}
+.greet{position:relative; z-index:1; margin-top:18px;}
+.greet h2{font-size:20px; margin:0 0 2px; font-weight:800;}
+.greet p{margin:0; font-size:12.5px; opacity:.85;}
+
+main{padding:0 16px; margin-top:-34px; position:relative; z-index:2;}
+.page{display:none; animation:fadein .3s cubic-bezier(.22,1,.36,1);}
+.page.active{display:block;}
+@keyframes fadein{from{opacity:0; transform:translateY(10px);} to{opacity:1; transform:translateY(0);}}
+
+/* Pull-to-refresh */
+#ptrIndicator, #staffPtrIndicator{
+  display:flex; align-items:center; justify-content:center; height:0; overflow:hidden;
+  transition:height .2s ease; color:var(--areca-500);
+}
+#ptrIndicator .spin, #staffPtrIndicator .spin{
+  width:22px;height:22px;border-radius:50%; border:2.5px solid var(--areca-100);
+  border-top-color:var(--areca-500); animation:spin .7s linear infinite;
+}
+@keyframes spin{to{transform:rotate(360deg);}}
+
+/* Skeleton shimmer */
+.skeleton{
+  background:linear-gradient(90deg, var(--paper-dim) 25%, var(--line) 37%, var(--paper-dim) 63%);
+  background-size:400% 100%; animation:shimmer 1.4s ease infinite;
+  border-radius:var(--radius-md);
+}
+@keyframes shimmer{0%{background-position:100% 50%;} 100%{background-position:0 50%;}}
+.skel-stat{height:104px;}
+.skel-row{height:64px; margin-bottom:10px;}
+
+/* Dashboard stat cards */
+.stat-grid{display:grid; grid-template-columns:repeat(2,1fr); gap:12px; margin-bottom:20px;}
+.stat-card{
+  background:var(--card); border-radius:var(--radius-md); padding:16px;
+  box-shadow:var(--shadow-soft); border:1px solid var(--line);
+  transition:transform .15s ease, box-shadow .15s ease;
+}
+.stat-card:active{transform:scale(.97);}
+.stat-icon{
+  width:42px;height:42px;border-radius:14px; display:flex; align-items:center; justify-content:center;
+  margin-bottom:10px;
+}
+.stat-icon .material-symbols-rounded{font-size:22px;}
+.si-primary{background:var(--areca-50); color:var(--areca-500);}
+.si-success{background:var(--success-50); color:var(--success);}
+.si-danger{background:var(--vermilion-50); color:var(--vermilion);}
+.si-warning{background:#FEF3C7; color:var(--marigold-dark);}
+.si-secondary{background:#EDE9FE; color:var(--secondary);}
+.si-accent{background:#CFFAFE; color:var(--accent);}
+[data-theme="dark"] .si-warning{background:rgba(245,158,11,.18);}
+[data-theme="dark"] .si-secondary{background:rgba(124,58,237,.2);}
+[data-theme="dark"] .si-accent{background:rgba(6,182,212,.18);}
+.stat-card .val{font-family:var(--font-num); font-size:23px; font-weight:800; letter-spacing:-.5px;}
+.stat-card .lbl{font-size:11.5px; color:var(--muted); font-weight:600; margin-top:2px;}
+.stat-card.wide{grid-column:1/-1; display:flex; align-items:center; gap:14px;}
+.stat-card.wide .stat-icon{margin-bottom:0;}
+.stat-card.wide .stat-body{flex:1;}
+
+.section-title{display:flex; justify-content:space-between; align-items:center; margin:22px 0 12px;}
+.section-title h3{font-size:15.5px; margin:0; font-weight:700;}
+.section-title .see-all{font-size:12.5px; color:var(--areca-500); font-weight:600; background:none; border:none;}
+
+.quick-grid{display:grid; grid-template-columns:repeat(3,1fr); gap:10px;}
+.quick-item{
+  background:var(--card); border:1px solid var(--line); border-radius:var(--radius-md);
+  padding:16px 6px; text-align:center; box-shadow:var(--shadow-soft);
+  transition:transform .15s ease;
+}
+.quick-item:active{transform:scale(.94);}
+.quick-item .qi-icon{
+  width:42px;height:42px;border-radius:14px;background:var(--areca-50); color:var(--areca-500);
+  display:flex;align-items:center;justify-content:center;margin:0 auto 8px;
+}
+.quick-item .qi-lbl{font-size:11.5px; font-weight:600; color:var(--ink);}
+
+.card{
+  background:var(--card); border:1px solid var(--line); border-radius:var(--radius-md);
+  padding:16px; box-shadow:var(--shadow-soft); margin-bottom:12px;
+}
+.chart-wrap{height:190px; margin-top:6px;}
+
+/* Staff list */
+.search-bar{display:flex; gap:8px; margin-bottom:14px; position:relative;}
+.staff-stats-row{display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin-bottom:14px;}
+.staff-mini-stat{background:var(--card); border:1px solid var(--line); border-radius:16px; padding:12px; text-align:center; box-shadow:var(--shadow-soft);}
+.staff-mini-stat .v{font-family:var(--font-num); font-size:19px; font-weight:800;}
+.staff-mini-stat .l{font-size:10.5px; color:var(--muted); font-weight:600; margin-top:2px;}
+.filter-chips{display:flex; gap:8px; margin-bottom:14px; overflow-x:auto;}
+.filter-chips .chip{
+  padding:8px 16px; border-radius:999px; border:1.5px solid var(--line); background:var(--card);
+  color:var(--muted); font-size:12.5px; font-weight:600; white-space:nowrap; transition:.2s; flex-shrink:0;
+}
+.filter-chips .chip.active{background:linear-gradient(135deg,var(--areca-500),var(--secondary)); color:#fff; border-color:transparent; box-shadow:0 6px 16px rgba(79,70,229,.3);}
+.search-bar .material-symbols-rounded{position:absolute; left:14px; top:50%; transform:translateY(-50%); color:var(--muted); font-size:20px;}
+.search-bar input{
+  flex:1; padding:13px 14px 13px 42px; border-radius:999px; border:1.5px solid var(--line);
+  background:var(--card); color:var(--ink); font-size:13.5px; box-shadow:var(--shadow-soft);
+}
+.fab{
+  position:fixed; right:18px; bottom:100px; z-index:50;
+  width:58px;height:58px;border-radius:20px; border:none;
+  background:linear-gradient(135deg, var(--accent), var(--secondary));
+  color:#fff; box-shadow:0 14px 30px rgba(6,182,212,.4);
+  display:flex;align-items:center;justify-content:center; transition:transform .15s;
+}
+.fab:active{transform:scale(.9) rotate(90deg);}
+.staff-row-wrap{position:relative; border-radius:var(--radius-md); overflow:hidden; margin-bottom:10px;}
+.staff-row-swipe-bg{
+  position:absolute; inset:0; display:flex; justify-content:flex-end; align-items:center;
+  background:var(--vermilion); border-radius:var(--radius-md); padding-right:22px;
+}
+.staff-row-swipe-bg .material-symbols-rounded{color:#fff; font-size:22px;}
+.staff-row{
+  display:flex; align-items:center; gap:12px; background:var(--card);
+  border:1px solid var(--line); border-radius:var(--radius-md); padding:12px;
+  box-shadow:var(--shadow-soft); position:relative; transition:transform .2s ease;
+}
+.avatar{
+  width:48px;height:48px;border-radius:15px; background:var(--areca-50); color:var(--areca-600);
+  display:flex;align-items:center;justify-content:center; font-weight:700; font-family:var(--font-display);
+  overflow:hidden; flex-shrink:0;
+}
+.avatar img{width:100%;height:100%;object-fit:cover;}
+.staff-info{flex:1; min-width:0;}
+.staff-info .name{font-weight:700; font-size:14.5px;}
+.staff-info .meta{font-size:11.5px; color:var(--muted);}
+.badge{font-size:10.5px; font-weight:700; padding:3px 9px; border-radius:999px;}
+.badge.active{background:var(--success-50); color:var(--success);}
+.badge.inactive{background:var(--vermilion-50); color:var(--vermilion);}
+.staff-actions{display:flex; gap:6px;}
+.mini-btn{width:32px;height:32px; border-radius:10px; border:none; background:var(--paper-dim); display:flex; align-items:center; justify-content:center; color:var(--ink);}
+
+/* Attendance signature element: radial check-in dial */
+.attend-hero{
+  background:linear-gradient(160deg, var(--areca-600), var(--secondary));
+  border-radius:var(--radius-lg); padding:24px; text-align:center; color:#fff; margin-bottom:16px;
+  box-shadow:var(--shadow-lift); position:relative; overflow:hidden;
+}
+.attend-hero::after{content:''; position:absolute; right:-30px; bottom:-40px; width:160px; height:160px; background:radial-gradient(circle, rgba(6,182,212,.35), transparent 70%);}
+.dial{
+  width:154px;height:154px;border-radius:50%; margin:0 auto 14px; position:relative; z-index:1;
+  background:conic-gradient(var(--accent) calc(var(--pct,0)*1%), rgba(255,255,255,.18) 0);
+  display:flex;align-items:center;justify-content:center;
+}
+.dial::before{content:''; position:absolute; inset:11px; border-radius:50%; background:var(--areca-600);}
+.dial .dial-inner{position:relative; z-index:1;}
+.dial .dial-inner .t{font-family:var(--font-num); font-size:23px; font-weight:800;}
+.dial .dial-inner .l{font-size:10.5px; opacity:.8;}
+.attend-buttons{display:flex; gap:10px; position:relative; z-index:1;}
+.attend-buttons button{
+  flex:1; padding:15px 0; border-radius:16px; border:none; font-weight:700; font-size:15px;
+  display:flex; align-items:center; justify-content:center; gap:6px; transition:transform .15s;
+}
+.attend-buttons button:active{transform:scale(.96);}
+.btn-checkin{background:linear-gradient(135deg,var(--accent),#22D3EE); color:#0B3B45;}
+.btn-checkout{background:rgba(255,255,255,.18); color:#fff;}
+.attend-buttons button:disabled{opacity:.5;}
+
+.att-list-item{
+  display:flex; justify-content:space-between; align-items:center; padding:12px 4px;
+  border-bottom:1px solid var(--line);
+}
+.att-list-item:last-child{border-bottom:none;}
+.status-pill{font-size:10.5px; font-weight:700; padding:4px 10px; border-radius:999px;}
+.status-Present{background:var(--success-50); color:var(--success);}
+.status-Late{background:#FEF3C7; color:var(--marigold-dark);}
+.status-HalfDay{background:#EDE9FE; color:var(--secondary);}
+.status-Absent{background:var(--vermilion-50); color:var(--vermilion);}
+.status-WeeklyOff{background:var(--paper-dim); color:var(--muted);}
+.status-Leave{background:#CFFAFE; color:#0E7490;}
+.status-HalfDayLeave{background:#CFFAFE; color:#0E7490;}
+.status-Pending{background:#FEF3C7; color:var(--marigold-dark);}
+.status-Approved{background:var(--success-50); color:var(--success);}
+.status-Rejected{background:var(--vermilion-50); color:var(--vermilion);}
+.leave-row{
+  display:flex; justify-content:space-between; align-items:flex-start; gap:10px;
+  padding:12px 4px; border-bottom:1px solid var(--line);
+}
+.leave-row:last-child{border-bottom:none;}
+.leave-row .lname{font-weight:700; font-size:13.5px;}
+.leave-row .lmeta{font-size:11.5px; color:var(--muted); margin-top:2px;}
+.leave-actions{display:flex; gap:6px; flex-shrink:0;}
+.leave-actions button{
+  padding:7px 11px; border-radius:10px; border:none; font-size:11.5px; font-weight:700;
+}
+.btn-approve{background:var(--success-50); color:var(--success);}
+.btn-reject{background:var(--vermilion-50); color:var(--vermilion);}
+
+/* Staff Detail: Attendance "story strip" (day chips w/ selfie + status ring) */
+.day-strip{display:flex; gap:12px; overflow-x:auto; padding:6px 2px 16px; scroll-snap-type:x proximity;}
+.day-chip{flex-shrink:0; display:flex; flex-direction:column; align-items:center; gap:5px; scroll-snap-align:start;}
+.day-chip .ring{width:48px;height:48px;border-radius:50%; padding:2.5px; display:flex; align-items:center; justify-content:center;}
+.day-chip .ring-inner{width:100%;height:100%;border-radius:50%; overflow:hidden; background:var(--card); display:flex; align-items:center; justify-content:center;}
+.day-chip .ring-inner img{width:100%;height:100%;object-fit:cover;}
+.day-chip .ring-inner .ph{font-size:12px; color:var(--muted); font-weight:700;}
+.day-chip .dnum{font-size:10px; color:var(--muted); font-weight:700;}
+.day-chip.selected .dnum{color:var(--areca-500);}
+.day-chip .ring.suspect{outline:2.5px dashed var(--vermilion); outline-offset:2px;}
+.gallery-warn{
+  display:inline-flex; align-items:center; gap:4px; background:var(--vermilion-50); color:var(--vermilion);
+  font-size:11px; font-weight:700; padding:4px 9px; border-radius:999px; margin-top:6px;
+}
+.gallery-warn .material-symbols-rounded{font-size:14px;}
+.ring-present{background:linear-gradient(135deg,var(--success),#16A34A);}
+.ring-late{background:linear-gradient(135deg,var(--marigold),var(--marigold-dark));}
+.ring-halfday{background:linear-gradient(135deg,#A78BFA,var(--secondary));}
+.ring-absent{background:linear-gradient(135deg,var(--vermilion),#B91C1C);}
+.ring-leave{background:linear-gradient(135deg,var(--accent),#0E7490);}
+.ring-none{background:var(--line);}
+.sd-stat-grid{display:grid; grid-template-columns:repeat(4,1fr); gap:8px; margin-bottom:16px;}
+.sd-stat{background:var(--card); border:1px solid var(--line); border-radius:14px; padding:11px 4px; text-align:center;}
+.sd-stat .v{font-family:var(--font-num); font-size:16px; font-weight:800;}
+.sd-stat .l{font-size:9px; color:var(--muted); font-weight:600; margin-top:2px;}
+
+/* Salary */
+.staff-select{
+  width:100%; padding:13px 14px; border-radius:var(--radius-sm); border:1.5px solid var(--line);
+  background:var(--card); color:var(--ink); margin-bottom:14px; font-size:14px;
+}
+.breakdown-row{display:flex; justify-content:space-between; padding:9px 0; font-size:13.5px; border-bottom:1px dashed var(--line);}
+.breakdown-row.total{border:none; font-weight:800; font-size:17px; padding-top:12px;}
+.breakdown-row .plus{color:var(--success);}
+.breakdown-row .minus{color:var(--vermilion);}
+.btn-outline{
+  width:100%; padding:13px; border-radius:var(--radius-sm); background:transparent;
+  border:1.5px solid var(--areca-500); color:var(--areca-500); font-weight:700; font-size:14px; margin-top:8px;
+  display:flex; align-items:center; justify-content:center; gap:6px; transition:transform .15s;
+}
+.btn-outline:active{transform:scale(.97);}
+
+/* Settings */
+.settings-group h4{font-size:12.5px; color:var(--muted); text-transform:uppercase; letter-spacing:.6px; margin:20px 0 8px; font-weight:700;}
+.toggle-row{display:flex; justify-content:space-between; align-items:center; padding:12px 0; border-bottom:1px solid var(--line);}
+.switch{position:relative; width:46px; height:26px;}
+.switch input{opacity:0; width:0; height:0;}
+.slider{position:absolute; inset:0; background:var(--line); border-radius:999px; transition:.2s;}
+.slider::before{content:''; position:absolute; width:20px;height:20px; left:3px; top:3px; background:#fff; border-radius:50%; transition:.2s; box-shadow:0 2px 6px rgba(0,0,0,.2);}
+input:checked + .slider{background:linear-gradient(135deg,var(--areca-500),var(--secondary));}
+input:checked + .slider::before{transform:translateX(20px);}
+
+/* Bottom nav — floating glass pill, Material 3 style */
+nav.bottomnav{
+  position:fixed; bottom:14px; left:14px; right:14px; background:var(--glass);
+  backdrop-filter:blur(20px) saturate(180%); -webkit-backdrop-filter:blur(20px) saturate(180%);
+  border:1px solid var(--line); border-radius:26px;
+  display:flex; z-index:60; padding:8px 6px; box-shadow:0 16px 40px rgba(15,23,42,.14);
+}
+nav.bottomnav button{
+  flex:1; background:none; border:none; display:flex; flex-direction:column; align-items:center; gap:2px;
+  color:var(--muted); font-size:10px; font-weight:600; padding:8px 0; border-radius:16px; transition:.2s;
+  position:relative;
+}
+nav.bottomnav button .nicon{font-size:21px;}
+nav.bottomnav button.active{color:var(--areca-500); background:var(--areca-50);}
+
+/* Modal */
+.modal-overlay{
+  display:none; position:fixed; inset:0; background:rgba(15,23,42,.55); z-index:100;
+  align-items:flex-end; justify-content:center; backdrop-filter:blur(2px);
+}
+.modal-overlay.show{display:flex;}
+.modal-sheet{
+  background:var(--paper); width:100%; max-width:480px; max-height:88vh; overflow-y:auto;
+  border-radius:28px 28px 0 0; padding:22px 18px 28px; animation:slideup .3s cubic-bezier(.22,1,.36,1);
+  border-top:1px solid var(--line);
+}
+@keyframes slideup{from{transform:translateY(40px); opacity:0;} to{transform:translateY(0); opacity:1;}}
+.modal-head{display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;}
+.modal-head h3{margin:0; font-size:17.5px; font-weight:700;}
+.modal-close{background:var(--paper-dim); border:none; width:34px;height:34px;border-radius:12px; display:flex; align-items:center; justify-content:center; color:var(--ink);}
+.grid2{display:grid; grid-template-columns:1fr 1fr; gap:10px;}
+
+.toast{
+  position:fixed; bottom:110px; left:50%; transform:translateX(-50%); background:var(--ink); color:#fff;
+  padding:12px 20px; border-radius:999px; font-size:13px; z-index:200; opacity:0; transition:opacity .25s, transform .25s;
+  pointer-events:none; max-width:88%; text-align:center; box-shadow:0 12px 30px rgba(0,0,0,.25);
+  display:flex; align-items:center; gap:8px;
+}
+.toast.show{opacity:1; transform:translate(-50%,-6px);}
+
+.empty-state{text-align:center; padding:44px 10px; color:var(--muted);}
+.empty-state .ei{
+  width:64px;height:64px;border-radius:20px;background:var(--areca-50); color:var(--areca-500);
+  display:flex;align-items:center;justify-content:center;margin:0 auto 12px;
+}
+.empty-state .ei .material-symbols-rounded{font-size:30px;}
+
+@media(min-width:640px){
+  main{max-width:520px; margin:auto;}
+  header.topbar{max-width:520px; margin:auto;}
+  nav.bottomnav{max-width:520px; margin:14px auto;}
+}
+</style>
+</head>
+<body>
+
+<!-- =============================================================== -->
+<!-- LOGIN SCREEN                                                     -->
+<!-- =============================================================== -->
+<div id="loginScreen">
+  <div class="login-brand">
+    <div class="mark"><span class="material-symbols-rounded">storefront</span></div>
+    <h1 data-i18n="appName">ஊழியர் மேலாண்மை</h1>
+    <p data-i18n="appTag">உங்கள் கடையின் ஊழியர்களை எளிதாக நிர்வகிக்கவும்</p>
+  </div>
+
+  <div class="login-card">
+    <div class="tabs">
+      <button id="ownerTabBtn" class="active" onclick="switchLoginTab('owner')"><span class="material-symbols-rounded">person</span><span data-i18n="ownerLogin">Owner Login</span></button>
+      <button id="staffTabBtn" onclick="switchLoginTab('staff')"><span class="material-symbols-rounded">group</span><span data-i18n="staffLogin">Staff Login</span></button>
+    </div>
+
+    <!-- Owner login -->
+    <div id="ownerLoginForm">
+      <div class="field">
+        <label data-i18n="email">மின்னஞ்சல் / Email</label>
+        <input type="email" id="ownerEmail" placeholder="owner@shop.com" autocomplete="username">
+      </div>
+      <div class="field">
+        <label data-i18n="password">கடவுச்சொல் / Password</label>
+        <div class="pw-wrap">
+          <input type="password" id="ownerPassword" placeholder="••••••••" autocomplete="current-password">
+          <button type="button" class="eye-toggle" onclick="togglePwVisibility('ownerPassword', this)"><span class="material-symbols-rounded">visibility</span></button>
+        </div>
+      </div>
+      <div class="row-between">
+        <label class="chk"><input type="checkbox" id="rememberMe" checked> <span data-i18n="remember">என்னை நினைவில் வை</span></label>
+        <button class="link" onclick="forgotPassword()" data-i18n="forgot">கடவுச்சொல் மறந்துவிட்டதா?</button>
+      </div>
+      <div class="form-error" id="ownerLoginError"></div>
+      <button class="btn-primary" id="ownerLoginBtn" onclick="ownerLogin()"><span class="material-symbols-rounded">login</span><span data-i18n="loginBtn">உள்நுழை / Login</span></button>
+      <button class="btn-secondary" onclick="toggleSignup()"><span class="material-symbols-rounded">person_add</span><span data-i18n="newOwner">புதிய கடை உரிமையாளரா? பதிவு செய்யவும்</span></button>
+
+      <div id="signupBlock" style="display:none; margin-top:14px; border-top:1px solid var(--line); padding-top:14px;">
+        <div class="field">
+          <label data-i18n="shopName">கடையின் பெயர்</label>
+          <input type="text" id="signupShopName" placeholder="எ.கா. Thiran Mobiles">
+        </div>
+        <div class="field">
+          <label data-i18n="email">மின்னஞ்சல்</label>
+          <input type="email" id="signupEmail" placeholder="owner@shop.com">
+        </div>
+        <div class="field">
+          <label data-i18n="password">கடவுச்சொல் (குறைந்தது 6 எழுத்துகள்)</label>
+          <div class="pw-wrap">
+            <input type="password" id="signupPassword" placeholder="••••••••">
+            <button type="button" class="eye-toggle" onclick="togglePwVisibility('signupPassword', this)"><span class="material-symbols-rounded">visibility</span></button>
+          </div>
+        </div>
+        <div class="form-error" id="signupError"></div>
+        <button class="btn-primary" id="signupBtn" onclick="ownerSignup()"><span class="material-symbols-rounded">check_circle</span><span data-i18n="createAccount">கணக்கு உருவாக்கு</span></button>
+      </div>
+    </div>
+
+    <!-- Staff login -->
+    <div id="staffLoginForm" style="display:none;">
+      <div class="field">
+        <label data-i18n="mobile">மொபைல் எண்</label>
+        <input type="tel" id="staffMobile" placeholder="98765 43210" maxlength="10">
+      </div>
+      <div class="field">
+        <label data-i18n="staffPin">4-இலக்க PIN (உங்கள் Owner கொடுத்தது)</label>
+        <div class="pw-wrap">
+          <input type="password" id="staffPin" placeholder="••••" maxlength="4" inputmode="numeric">
+          <button type="button" class="eye-toggle" onclick="togglePwVisibility('staffPin', this)"><span class="material-symbols-rounded">visibility</span></button>
+        </div>
+      </div>
+      <div class="form-error" id="staffLoginError"></div>
+      <button class="btn-primary" onclick="staffLogin()"><span class="material-symbols-rounded">login</span><span data-i18n="loginBtn">உள்நுழை / Login</span></button>
+      <p style="font-size:11.5px; color:var(--muted); text-align:center; margin-top:12px;" data-i18n="staffPinNote">
+        குறிப்பு: உங்கள் PIN-ஐ கடை உரிமையாளரிடம் பெறவும்.
+      </p>
+    </div>
+  </div>
+</div>
+
+<!-- =============================================================== -->
+<!-- MAIN APP                                                         -->
+<!-- =============================================================== -->
+<div id="app">
+  <header class="topbar">
+    <div class="topbar-row">
+      <div class="brand-mini">
+        <div class="logo-chip" id="companyLogoChip"><span class="material-symbols-rounded">storefront</span></div>
+        <div>
+          <div class="co-name" id="companyNameLbl">என் கடை</div>
+          <div class="co-sub" id="todayDateLbl">--</div>
+        </div>
+      </div>
+      <div class="topbar-actions">
+        <button class="icon-btn" onclick="toggleLang()" title="Language" style="font-weight:800; font-size:13px;">அ</button>
+        <button class="icon-btn" id="themeToggleBtn" onclick="toggleTheme()" title="Theme"><span class="material-symbols-rounded">dark_mode</span></button>
+        <button class="icon-btn" onclick="goPage('leave')" title="Notifications" style="position:relative;">
+          <span class="material-symbols-rounded">notifications</span>
+          <span id="notifBadge" style="display:none; position:absolute; top:2px; right:2px; width:9px; height:9px; border-radius:50%; background:var(--vermilion); border:1.5px solid var(--areca-700);"></span>
+        </button>
+        <button class="icon-btn" onclick="logout()" title="Logout"><span class="material-symbols-rounded">logout</span></button>
+      </div>
+    </div>
+    <div class="greet">
+      <h2 id="greetName" data-i18n="dashboard">டாஷ்போர்டு</h2>
+      <p data-i18n="greetSub">இன்றைய கடையின் ஒரு பார்வை</p>
+    </div>
+  </header>
+
+  <div id="ptrIndicator"><div class="spin"></div></div>
+
+  <main id="mainScroll">
+    <!-- ===================== DASHBOARD PAGE ===================== -->
+    <section class="page active" id="page-dashboard">
+      <div id="dashSkeleton" class="stat-grid" style="display:none;">
+        <div class="skeleton skel-stat"></div><div class="skeleton skel-stat"></div>
+        <div class="skeleton skel-stat"></div><div class="skeleton skel-stat"></div>
+      </div>
+      <div class="stat-grid" id="dashStatGrid">
+        <div class="stat-card">
+          <div class="stat-icon si-primary"><span class="material-symbols-rounded">group</span></div>
+          <div class="val num" id="stTotalStaff">0</div>
+          <div class="lbl" data-i18n="totalStaff">மொத்த ஊழியர்கள்</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon si-success"><span class="material-symbols-rounded">check_circle</span></div>
+          <div class="val num" id="stPresent">0</div>
+          <div class="lbl" data-i18n="presentToday">இன்று வந்தவர்</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon si-danger"><span class="material-symbols-rounded">cancel</span></div>
+          <div class="val num" id="stAbsent">0</div>
+          <div class="lbl" data-i18n="absentToday">இன்று வராதவர்</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon si-warning"><span class="material-symbols-rounded">schedule</span></div>
+          <div class="val num" id="stLate">0</div>
+          <div class="lbl" data-i18n="lateToday">தாமதமானவர்</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon si-secondary"><span class="material-symbols-rounded">brightness_4</span></div>
+          <div class="val num" id="stHalfDay">0</div>
+          <div class="lbl">Half Day இன்று</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon si-warning"><span class="material-symbols-rounded">payments</span></div>
+          <div class="val num" id="stTodayCost">₹0</div>
+          <div class="lbl" data-i18n="todaySalaryCost">இன்றைய சம்பள செலவு</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon si-primary"><span class="material-symbols-rounded">calendar_month</span></div>
+          <div class="val num" id="stMonthCost">₹0</div>
+          <div class="lbl" data-i18n="monthSalaryCost">இந்த மாத செலவு</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon si-secondary"><span class="material-symbols-rounded">redeem</span></div>
+          <div class="val num" id="stIncentives">₹0</div>
+          <div class="lbl" data-i18n="totalIncentives">மொத்த ஊக்கத்தொகை</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon si-accent"><span class="material-symbols-rounded">receipt_long</span></div>
+          <div class="val num" id="stAdvances">₹0</div>
+          <div class="lbl" data-i18n="pendingAdvance">நிலுவை முன்பணம்</div>
+        </div>
+        <div class="stat-card wide">
+          <div class="stat-icon si-primary"><span class="material-symbols-rounded">edit_note</span></div>
+          <div class="stat-body">
+            <div class="val num" id="stLeaveReq" style="font-size:19px;">0</div>
+            <div class="lbl" data-i18n="leaveRequests">விடுமுறை கோரிக்கைகள்</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="section-title"><h3 data-i18n="quickActions">விரைவு செயல்கள்</h3></div>
+      <div class="quick-grid">
+        <div class="quick-item" onclick="haptic(); openStaffModal()"><div class="qi-icon"><span class="material-symbols-rounded">person_add</span></div><div class="qi-lbl" data-i18n="addStaff">ஊழியர் சேர்</div></div>
+        <div class="quick-item" onclick="haptic(); goPage('attendance')"><div class="qi-icon"><span class="material-symbols-rounded">schedule</span></div><div class="qi-lbl" data-i18n="attendance">வருகை</div></div>
+        <div class="quick-item" onclick="haptic(); goPage('salary')"><div class="qi-icon"><span class="material-symbols-rounded">payments</span></div><div class="qi-lbl" data-i18n="salary">சம்பளம்</div></div>
+        <div class="quick-item" onclick="haptic(); goPage('staff')"><div class="qi-icon"><span class="material-symbols-rounded">list_alt</span></div><div class="qi-lbl" data-i18n="staffList">ஊழியர் பட்டியல்</div></div>
+        <div class="quick-item" onclick="haptic(); goPage('leave')"><div class="qi-icon"><span class="material-symbols-rounded">edit_note</span></div><div class="qi-lbl" data-i18n="leaveRequests">விடுமுறை</div></div>
+        <div class="quick-item" onclick="haptic(); goPage('settings')"><div class="qi-icon"><span class="material-symbols-rounded">settings</span></div><div class="qi-lbl" data-i18n="settings">அமைப்புகள்</div></div>
+        <div class="quick-item" onclick="haptic(); exportMonthCSV()"><div class="qi-icon"><span class="material-symbols-rounded">ios_share</span></div><div class="qi-lbl" data-i18n="reports">அறிக்கை</div></div>
+      </div>
+
+      <div class="section-title"><h3 data-i18n="monthlyTrend">மாத சம்பள போக்கு</h3></div>
+      <div class="card"><div class="chart-wrap"><canvas id="trendChart"></canvas></div></div>
+    </section>
+
+    <!-- ===================== STAFF PAGE ===================== -->
+    <section class="page" id="page-staff">
+      <div class="staff-stats-row" id="staffStatsRow"></div>
+      <div class="filter-chips" id="staffFilterChips">
+        <button class="chip active" data-filter="all" onclick="setStaffFilter('all')">அனைத்தும்</button>
+        <button class="chip" data-filter="Active" onclick="setStaffFilter('Active')">Active</button>
+        <button class="chip" data-filter="Inactive" onclick="setStaffFilter('Inactive')">Inactive</button>
+      </div>
+      <div class="search-bar">
+        <span class="material-symbols-rounded">search</span>
+        <input type="text" id="staffSearch" placeholder="பெயர் / மொபைல் தேடு..." oninput="renderStaffList()">
+      </div>
+      <div id="staffListWrap"></div>
+    </section>
+
+    <!-- ===================== ATTENDANCE PAGE ===================== -->
+    <section class="page" id="page-attendance">
+      <select class="staff-select" id="attStaffSelect" onchange="refreshAttendanceHero()"></select>
+
+      <div class="attend-hero">
+        <div class="dial" id="attDial" style="--pct:0;">
+          <div class="dial-inner">
+            <div class="t num" id="attHoursTxt">0.0h</div>
+            <div class="l" data-i18n="workedToday">இன்று வேலை நேரம்</div>
+          </div>
+        </div>
+        <div id="attStatusLine" style="margin-bottom:12px; font-size:13px; opacity:.9;">--</div>
+        <div class="attend-buttons">
+          <button class="btn-checkin" id="btnCheckIn" onclick="haptic(); markCheckIn()"><span class="material-symbols-rounded">check_circle</span><span data-i18n="checkIn">Check In</span></button>
+          <button class="btn-checkout" id="btnCheckOut" onclick="haptic(); markCheckOut()"><span class="material-symbols-rounded">logout</span><span data-i18n="checkOut">Check Out</span></button>
+        </div>
+      </div>
+
+      <div class="section-title"><h3 data-i18n="last7days">சமீபத்திய வருகைப் பதிவு</h3></div>
+      <div class="card" id="attHistoryWrap"></div>
+    </section>
+
+    <!-- ===================== SALARY PAGE ===================== -->
+    <section class="page" id="page-salary">
+      <select class="staff-select" id="salStaffSelect" onchange="computeSalaryUI()"></select>
+      <div class="grid2" style="margin-bottom:14px;">
+        <div class="field" style="margin-bottom:0;">
+          <label data-i18n="month">மாதம்</label>
+          <input type="month" id="salMonth" onchange="computeSalaryUI()">
+        </div>
+        <div class="field" style="margin-bottom:0;">
+          <label data-i18n="advanceAmt">முன்பணம் சேர்</label>
+          <input type="number" id="salAdvanceAdd" placeholder="₹0">
+        </div>
+      </div>
+      <button class="btn-outline" style="margin-bottom:14px;" onclick="haptic(); addAdvance()"><span class="material-symbols-rounded">add_circle</span><span data-i18n="addAdvanceBtn">முன்பணம் சேர்</span></button>
+
+      <div class="grid2" style="margin-bottom:14px;">
+        <div class="field" style="margin-bottom:0;">
+          <label data-i18n="incentiveAmt">ஊக்கத்தொகை சேர்</label>
+          <input type="number" id="salIncentiveAdd" placeholder="₹0">
+        </div>
+        <div class="field" style="margin-bottom:0;">
+          <label data-i18n="incentiveReason">காரணம்</label>
+          <input type="text" id="salIncentiveReason" placeholder="Sales Bonus">
+        </div>
+      </div>
+      <button class="btn-outline" style="margin-bottom:18px;" onclick="haptic(); addIncentive()"><span class="material-symbols-rounded">add_circle</span><span data-i18n="addIncentiveBtn">ஊக்கத்தொகை சேர்</span></button>
+
+      <div class="card" id="salaryBreakdownWrap"></div>
+      <button class="btn-primary" style="margin-top:12px;" onclick="haptic(); generateSalarySlip()"><span class="material-symbols-rounded">picture_as_pdf</span><span data-i18n="downloadSlip">சம்பள சீட்டு PDF பதிவிறக்கு</span></button>
+      <button class="btn-outline" style="border-color:#25D366; color:#128C4A;" onclick="haptic(); shareSalarySlipWhatsApp()"><span class="material-symbols-rounded">share</span><span>WhatsApp-ல் Share பண்ணு</span></button>
+    </section>
+
+    <!-- ===================== LEAVE PAGE (Owner) ===================== -->
+    <section class="page" id="page-leave">
+      <div class="section-title"><h3 data-i18n="pendingRequests">நிலுவையில் உள்ளவை</h3></div>
+      <div class="card" id="leavePendingWrap"></div>
+
+      <div class="section-title"><h3 data-i18n="allRequests">எல்லா கோரிக்கைகள்</h3></div>
+      <div class="card" id="leaveAllWrap"></div>
+    </section>
+
+    <!-- ===================== SETTINGS PAGE ===================== -->
+    <section class="page" id="page-settings">
+      <div class="settings-group">
+        <h4 data-i18n="companyInfo">கடை விவரங்கள்</h4>
+        <div class="field"><label data-i18n="shopName">கடையின் பெயர்</label><input type="text" id="setShopName"></div>
+        <div class="field"><label data-i18n="shopAddress">முகவரி</label><input type="text" id="setShopAddress"></div>
+        <div class="field"><label data-i18n="gst">GST எண் (விருப்பம்)</label><input type="text" id="setGST"></div>
+        <div class="field"><label data-i18n="phone">தொலைபேசி எண்</label><input type="text" id="setPhone"></div>
+        <div class="field"><label data-i18n="logo">லோகோ</label><input type="file" id="setLogoFile" accept="image/*"></div>
+      </div>
+
+      <div class="settings-group">
+        <h4 data-i18n="salaryRules">சம்பள விதிகள்</h4>
+        <div class="field"><label data-i18n="workingDaysMonth">மாதத்திற்கு வேலை நாட்கள்</label><input type="number" id="setWorkingDays" value="26"></div>
+        <div class="field"><label data-i18n="shiftStart">ஷிப்ட் தொடக்கம்</label><input type="time" id="setShiftStart" value="09:30"></div>
+        <div class="field"><label data-i18n="lateAfter">தாமதம் கிரேஸ் (நிமிடம்)</label><input type="number" id="setLateGrace" value="15"></div>
+        <div class="field"><label data-i18n="lateDeductionPerDay">தாமதத்திற்கு நாளொன்றுக்கு கழிவு (₹)</label><input type="number" id="setLateDeduction" value="50"></div>
+        <div class="toggle-row"><span data-i18n="enablePF">PF கழிவு இயக்கு (12%)</span><label class="switch"><input type="checkbox" id="setPFEnabled"><span class="slider"></span></label></div>
+        <div class="toggle-row"><span data-i18n="enableESI">ESI கழிவு இயக்கு (0.75%)</span><label class="switch"><input type="checkbox" id="setESIEnabled"><span class="slider"></span></label></div>
+        <div class="toggle-row"><span>அங்கீகரிக்கப்பட்ட விடுமுறையை Paid ஆ கணக்கிடு</span><label class="switch"><input type="checkbox" id="setPaidLeave"><span class="slider"></span></label></div>
+        <p style="font-size:11px; color:var(--muted); margin-top:2px;">Off-ஆ இருந்தா, Owner Approve பண்ண Leave-கூட Salary-ல் "Unpaid" ஆக கழிக்கப்படும்.</p>
+      </div>
+
+      <div class="settings-group">
+        <h4>கடை Location (GPS Attendance)</h4>
+        <div class="field">
+          <div id="setShopLocDisplay" style="font-size:12.5px; color:var(--muted); margin-bottom:10px;">Location இன்னும் Set செய்யப்படவில்லை — யாராலும் எங்கிருந்தும் Check In பண்ணலாம்</div>
+          <button class="btn-outline" type="button" onclick="captureShopLocation()"><span class="material-symbols-rounded">location_on</span><span>இப்போதைய Location-ஐ கடை Location-ஆ Set பண்ணு</span></button>
+          <input type="hidden" id="setShopLat">
+          <input type="hidden" id="setShopLng">
+        </div>
+        <div class="field"><label>அனுமதிக்கப்பட்ட தூரம் (meters)</label><input type="number" id="setGpsRadius" value="50" min="10" max="500"></div>
+        <p style="font-size:11.5px; color:var(--muted); margin-top:-6px;">குறிப்பு: இதை Set பண்ணின பிறகு, இந்த தூரத்திற்கு வெளிய Staff Check In பண்ண முடியாது.</p>
+      </div>
+
+      <div class="settings-group">
+        <h4 data-i18n="appPrefs">பயன்பாட்டு விருப்பங்கள்</h4>
+        <div class="toggle-row"><span data-i18n="darkModeLbl">Dark Mode</span><label class="switch"><input type="checkbox" id="setDarkMode" onchange="toggleTheme(true)"><span class="slider"></span></label></div>
+        <button class="btn-secondary install-app-btn" style="display:none; margin-top:10px;" onclick="installApp()"><span class="material-symbols-rounded">install_mobile</span><span>Home Screen-ல் Install பண்ணு</span></button>
+      </div>
+
+      <button class="btn-primary" style="margin-top:16px;" onclick="haptic(); saveSettings()"><span class="material-symbols-rounded">save</span><span data-i18n="saveSettings">அமைப்புகளை சேமி</span></button>
+      <button class="btn-secondary" onclick="exportMonthCSV()"><span class="material-symbols-rounded">download</span><span data-i18n="exportCSV">இந்த மாத அறிக்கை (CSV)</span></button>
+    </section>
+  </main>
+
+  <nav class="bottomnav">
+    <button class="active" data-page="dashboard" onclick="haptic(); goPage('dashboard')"><span class="nicon material-symbols-rounded">home</span><span data-i18n="nDash">முகப்பு</span></button>
+    <button data-page="staff" onclick="haptic(); goPage('staff')"><span class="nicon material-symbols-rounded">group</span><span data-i18n="nStaff">ஊழியர்</span></button>
+    <button data-page="attendance" onclick="haptic(); goPage('attendance')"><span class="nicon material-symbols-rounded">schedule</span><span data-i18n="nAtt">வருகை</span></button>
+    <button data-page="salary" onclick="haptic(); goPage('salary')"><span class="nicon material-symbols-rounded">payments</span><span data-i18n="nSal">சம்பளம்</span></button>
+    <button data-page="settings" onclick="haptic(); goPage('settings')"><span class="nicon material-symbols-rounded">settings</span><span data-i18n="nSet">அமைப்பு</span></button>
+  </nav>
+
+  <button class="fab" id="staffFab" onclick="haptic(); openStaffModal()"><span class="material-symbols-rounded">add</span></button>
+</div>
+
+<!-- =============================================================== -->
+<!-- STAFF SELF-SERVICE SCREEN (Selfie + GPS Check In/Out)            -->
+<!-- =============================================================== -->
+<div id="staffApp" style="display:none; min-height:100vh;">
+  <header class="topbar" style="padding-bottom:34px;">
+    <div class="topbar-row">
+      <div class="brand-mini">
+        <div class="logo-chip"><span class="material-symbols-rounded">badge</span></div>
+        <div>
+          <div class="co-name" id="staffAppName">--</div>
+          <div class="co-sub" id="staffAppDate">--</div>
+        </div>
+      </div>
+      <div class="topbar-actions">
+        <button class="icon-btn" onclick="haptic(); refreshStaffAllData(true)"><span class="material-symbols-rounded">refresh</span></button>
+        <button class="icon-btn" onclick="staffLogout()"><span class="material-symbols-rounded">logout</span></button>
+      </div>
+    </div>
+  </header>
+  <div id="staffPtrIndicator"><div class="spin"></div></div>
+  <main id="staffMainScroll" style="margin-top:-20px;">
+    <button class="btn-secondary install-app-btn" style="display:none; margin-bottom:14px;" onclick="installApp()"><span class="material-symbols-rounded">install_mobile</span><span>Home Screen-ல் Install பண்ணு</span></button>
+    <div class="attend-hero">
+      <div class="dial" id="sDial" style="--pct:0;">
+        <div class="dial-inner">
+          <div class="t num" id="sHoursTxt">0.0h</div>
+          <div class="l" data-i18n="workedToday">இன்று வேலை நேரம்</div>
+        </div>
+      </div>
+      <div id="sStatusLine" style="margin-bottom:12px; font-size:13px; opacity:.9;">--</div>
+      <div class="attend-buttons">
+        <button class="btn-checkin" id="sBtnIn" onclick="haptic(); triggerSelfieCapture()"><span class="material-symbols-rounded">photo_camera</span><span>Selfie Check In</span></button>
+        <button class="btn-checkout" id="sBtnOut" onclick="haptic(); staffDoCheckout()"><span class="material-symbols-rounded">logout</span><span>Check Out</span></button>
+      </div>
+      <div style="font-size:11px; opacity:.75; margin-top:10px; display:flex; align-items:center; justify-content:center; gap:4px;"><span class="material-symbols-rounded">location_on</span><span>GPS தானாக பதிவு செய்யப்படும்</span></div>
+      <button class="btn-outline" id="sBtnBreakOut" style="display:none; margin-top:12px; border-color:rgba(255,255,255,.4); color:#fff;" onclick="haptic(); staffBreakOut()"><span class="material-symbols-rounded">directions_walk</span><span>வெளியே போகிறேன்</span></button>
+      <button class="btn-outline" id="sBtnBreakIn" style="display:none; margin-top:12px; border-color:rgba(255,255,255,.4); color:#fff;" onclick="haptic(); staffBreakIn()"><span class="material-symbols-rounded">login</span><span>திரும்பி வந்தேன்</span></button>
+    </div>
+    <div class="card" id="sBreaksWrap" style="display:none;"></div>
+    <div class="card" id="sSelfiePreviewCard" style="display:none; text-align:center;">
+      <img id="sSelfiePreview" style="width:96px;height:96px;border-radius:16px;object-fit:cover; margin-bottom:8px; border:2px solid var(--areca-500);">
+      <div style="font-size:12px; color:var(--muted);">இன்றைய Check In Selfie</div>
+    </div>
+
+    <div class="section-title">
+      <h3>விடுமுறை</h3>
+      <button class="see-all" onclick="haptic(); openLeaveApplyModal()"><span class="material-symbols-rounded">add_circle</span> விண்ணப்பி</button>
+    </div>
+    <div class="card" id="staffLeaveListWrap"></div>
+
+    <div class="section-title"><h3><span class="material-symbols-rounded">bar_chart</span> என் மாத சுருக்கம்</h3></div>
+    <input type="month" id="myMonthPicker" class="staff-select" onchange="loadMyMonthData()">
+    <div class="sd-stat-grid">
+      <div class="sd-stat"><div class="v num" id="myPresent">0</div><div class="l">Present</div></div>
+      <div class="sd-stat"><div class="v num" id="myLate">0</div><div class="l">Late</div></div>
+      <div class="sd-stat"><div class="v num" id="myHalfDay">0</div><div class="l">Half Day</div></div>
+      <div class="sd-stat"><div class="v num" id="myAbsent">0</div><div class="l">Absent</div></div>
+      <div class="sd-stat"><div class="v num" id="myLeaveCount">0</div><div class="l">Leave</div></div>
+    </div>
+    <div class="card" id="myPunctualityWrap" style="display:none;"></div>
+    <div class="card" id="myAttendanceListWrap"></div>
+  </main>
+  <input type="file" id="staffSelfieInput" accept="image/*" style="display:none;" onchange="onSelfieFilePicked(event)">
+</div>
+
+<!-- =============================================================== -->
+<!-- STAFF DETAIL MODAL (Owner) — Attendance Story Strip              -->
+<!-- =============================================================== -->
+<div class="modal-overlay" id="staffDetailModal">
+  <div class="modal-sheet" style="max-height:92vh;">
+    <div class="modal-head">
+      <h3 id="sdName">--</h3>
+      <button class="modal-close" onclick="closeModal('staffDetailModal')"><span class="material-symbols-rounded">close</span></button>
+    </div>
+    <div style="display:flex; align-items:center; gap:12px; margin-bottom:16px;">
+      <div class="avatar" id="sdAvatar" style="width:58px;height:58px;font-size:22px;"></div>
+      <div>
+        <div style="font-size:12.5px; font-weight:600;" id="sdDesig">--</div>
+        <div style="font-size:11.5px; color:var(--muted);" id="sdMobile">--</div>
+      </div>
+    </div>
+
+    <input type="month" id="sdMonth" class="staff-select" onchange="renderStaffDetail()">
+
+    <div class="section-title" style="margin-top:0;"><h3 style="font-size:13.5px; display:flex; align-items:center; gap:6px;"><span class="material-symbols-rounded">bolt</span>விரைவாக நிரப்பு (App Use பண்ண முன் இருந்த நாட்களுக்கு)</h3></div>
+    <div class="grid2" style="margin-bottom:10px;">
+      <div class="field" style="margin-bottom:0;"><label>தொடக்க தேதி</label><input type="date" id="bfFrom"></div>
+      <div class="field" style="margin-bottom:0;"><label>முடிவு தேதி</label><input type="date" id="bfTo"></div>
+    </div>
+    <div class="grid2" style="margin-bottom:10px; align-items:end;">
+      <div class="field" style="margin-bottom:0;">
+        <label>நிலை</label>
+        <select id="bfStatus" onchange="toggleBfLateField()">
+          <option value="Present">Present</option>
+          <option value="Late">Late</option>
+          <option value="Absent">Absent</option>
+          <option value="HalfDay">Half Day</option>
+          <option value="WeeklyOff">Weekly Off</option>
+        </select>
+      </div>
+      <label class="chk" style="padding-bottom:12px;"><input type="checkbox" id="bfSkipSunday" checked> ஞாயிறு தவிர்</label>
+    </div>
+    <div class="field" id="bfLateMinField" style="display:none;">
+      <label>தாமத நிமிடங்கள் (ஒவ்வொரு நாளுக்கும்)</label>
+      <input type="number" id="bfLateMinutes" value="15" min="1">
+    </div>
+    <button class="btn-outline" style="margin-bottom:18px;" onclick="haptic(); bulkFillAttendance()"><span class="material-symbols-rounded">bolt</span><span>நிரப்பு</span></button>
+
+        <div class="sd-stat-grid">
+      <div class="sd-stat"><div class="v num" id="sdPresent">0</div><div class="l">Present</div></div>
+      <div class="sd-stat"><div class="v num" id="sdLate">0</div><div class="l">Late</div></div>
+      <div class="sd-stat"><div class="v num" id="sdHalfDay">0</div><div class="l">Half Day</div></div>
+      <div class="sd-stat"><div class="v num" id="sdAbsent">0</div><div class="l">Absent</div></div>
+      <div class="sd-stat"><div class="v num" id="sdPct">0%</div><div class="l">Attendance</div></div>
+    </div>
+
+    <div class="card" id="sdPunctualityWrap" style="display:none;"></div>
+
+    <div class="section-title" style="margin-top:0;"><h3 style="font-size:13.5px; display:flex; align-items:center; gap:6px;"><span class="material-symbols-rounded">calendar_month</span>நாள்காட்டி (Selfie தொடுங்க)</h3></div>
+    <div class="day-strip" id="sdDayStrip"></div>
+
+    <div class="card" id="sdDayDetail" style="display:none;"></div>
+  </div>
+</div>
+
+<!-- =============================================================== -->
+<!-- ATTENDANCE EDIT MODAL (Owner correction)                         -->
+<!-- =============================================================== -->
+<div class="modal-overlay" id="attEditModal">
+  <div class="modal-sheet">
+    <div class="modal-head">
+      <h3>வருகை திருத்து</h3>
+      <button class="modal-close" onclick="closeModal('attEditModal')"><span class="material-symbols-rounded">close</span></button>
+    </div>
+    <input type="hidden" id="aeStaffId">
+    <input type="hidden" id="aeDate">
+    <div class="field"><label>தேதி</label><input type="text" id="aeDateDisplay" disabled></div>
+    <div class="field">
+      <label>நிலை</label>
+      <select id="aeStatus">
+        <option value="Present">Present</option>
+        <option value="Late">Late</option>
+        <option value="HalfDay">Half Day</option>
+        <option value="Absent">Absent</option>
+        <option value="WeeklyOff">Weekly Off</option>
+      </select>
+    </div>
+    <div class="grid2">
+      <div class="field"><label>Check In</label><input type="time" id="aeCheckIn"></div>
+      <div class="field"><label>Check Out</label><input type="time" id="aeCheckOut"></div>
+    </div>
+    <div class="field"><label>வேலை நேரம் (hours)</label><input type="number" id="aeWorkingHours" step="0.1" placeholder="0"></div>
+    <button class="btn-primary" onclick="haptic(); saveAttendanceEdit()"><span class="material-symbols-rounded">save</span><span>சேமி</span></button>
+    <button class="btn-secondary" style="color:var(--vermilion); margin-top:8px;" onclick="deleteAttendanceRecord()"><span class="material-symbols-rounded">delete</span><span>இந்த பதிவை நீக்கு</span></button>
+  </div>
+</div>
+
+<!-- =============================================================== -->
+<!-- LEAVE APPLY MODAL (Staff)                                        -->
+<!-- =============================================================== -->
+<div class="modal-overlay" id="leaveApplyModal">
+  <div class="modal-sheet">
+    <div class="modal-head">
+      <h3>விடுமுறை விண்ணப்பிக்க</h3>
+      <button class="modal-close" onclick="closeModal('leaveApplyModal')"><span class="material-symbols-rounded">close</span></button>
+    </div>
+    <div class="field"><label>தேதி</label><input type="date" id="leaveDateF"></div>
+    <div class="field">
+      <label>வகை</label>
+      <select id="leaveTypeF">
+        <option value="Full">முழு நாள்</option>
+        <option value="Half">அரை நாள்</option>
+      </select>
+    </div>
+    <div class="field"><label>காரணம்</label><input type="text" id="leaveReasonF" placeholder="காரணம் எழுதுங்க"></div>
+    <button class="btn-primary" onclick="haptic(); submitLeaveApplication()"><span class="material-symbols-rounded">send</span><span>சமர்ப்பி</span></button>
+  </div>
+</div>
+
+<!-- =============================================================== -->
+<!-- IN-BROWSER CAMERA MODAL (lighter than launching native camera)  -->
+<!-- =============================================================== -->
+<div class="modal-overlay" id="cameraModal">
+  <div class="modal-sheet" style="padding-bottom:20px;">
+    <div class="modal-head">
+      <h3 style="display:flex; align-items:center; gap:6px;"><span class="material-symbols-rounded">photo_camera</span>Selfie எடுங்க</h3>
+      <button class="modal-close" onclick="closeCameraModal()"><span class="material-symbols-rounded">close</span></button>
+    </div>
+    <video id="cameraVideo" autoplay playsinline muted style="width:100%; border-radius:14px; background:#000; max-height:55vh; object-fit:cover; transform:scaleX(-1);"></video>
+    <canvas id="cameraCanvas" style="display:none;"></canvas>
+    <button class="btn-primary" style="margin-top:14px;" onclick="haptic(); captureSelfieShot()"><span class="material-symbols-rounded">camera</span><span>Capture</span></button>
+    <button class="btn-secondary" onclick="fallbackFilePicker()"><span class="material-symbols-rounded">photo_library</span><span>கேமரா ஓபன் ஆகலையா? Gallery-ல் இருந்து தேர்வு செய்</span></button>
+  </div>
+</div>
+
+<!-- =============================================================== -->
+<!-- STAFF MODAL                                                      -->
+<!-- =============================================================== -->
+<div class="modal-overlay" id="staffModal">
+  <div class="modal-sheet">
+    <div class="modal-head">
+      <h3 id="staffModalTitle" data-i18n="addStaff">ஊழியர் சேர்</h3>
+      <button class="modal-close" onclick="closeModal('staffModal')"><span class="material-symbols-rounded">close</span></button>
+    </div>
+    <input type="hidden" id="staffEditId">
+    <div class="field"><label data-i18n="empId">ஊழியர் ID (தானாக)</label><input type="text" id="staffEmpId" disabled></div>
+    <div class="field"><label data-i18n="name">பெயர்</label><input type="text" id="staffName" placeholder="பெயர்"></div>
+    <div class="field"><label data-i18n="mobile">மொபைல் எண்</label><input type="tel" id="staffMobileF" maxlength="10" placeholder="98765 43210"></div>
+    <div class="field"><label data-i18n="staffPin">4-இலக்க PIN (Login-க்கு)</label>
+      <div class="pw-wrap">
+        <input type="password" id="staffPinF" maxlength="4" inputmode="numeric" placeholder="1234">
+        <button type="button" class="eye-toggle" onclick="togglePwVisibility('staffPinF', this)"><span class="material-symbols-rounded">visibility</span></button>
+      </div>
+    </div>
+    <div class="field"><label data-i18n="photo">புகைப்படம்</label><input type="file" id="staffPhotoF" accept="image/*"></div>
+    <div class="field"><label data-i18n="address">முகவரி</label><input type="text" id="staffAddressF"></div>
+    <div class="field"><label data-i18n="aadhaar">ஆதார் எண்</label><input type="text" id="staffAadhaarF" maxlength="12"></div>
+    <div class="grid2">
+      <div class="field"><label data-i18n="doj">சேர்ந்த தேதி</label><input type="date" id="staffDojF"></div>
+      <div class="field"><label data-i18n="designation">பதவி</label><input type="text" id="staffDesigF" placeholder="Sales Staff"></div>
+    </div>
+    <div class="grid2">
+      <div class="field"><label data-i18n="monthlySalary">மாத சம்பளம் (₹)</label><input type="number" id="staffMonthlySalF"></div>
+      <div class="field"><label data-i18n="workingDays">வேலை நாட்கள்</label><input type="number" id="staffWorkingDaysF" value="26"></div>
+    </div>
+    <div class="grid2">
+      <div class="field"><label data-i18n="shiftStart">ஷிப்ட் தொடக்கம்</label><input type="time" id="staffShiftStartF" value="09:30"></div>
+      <div class="field"><label data-i18n="shiftEnd">ஷிப்ட் முடிவு</label><input type="time" id="staffShiftEndF" value="20:00"></div>
+    </div>
+    <div class="field">
+      <label data-i18n="status">நிலை</label>
+      <select id="staffStatusF"><option value="Active">Active</option><option value="Inactive">Inactive</option></select>
+    </div>
+    <button class="btn-primary" onclick="haptic(); saveStaff()"><span class="material-symbols-rounded">save</span><span data-i18n="save">சேமி</span></button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* =====================================================================
+   SUPABASE CONFIG
+   -----------------------------------------------------------------
+   Pamdima: இங்கே உங்கள் Supabase project URL மற்றும் anon key போடவும்.
+   Supabase Dashboard -> Project Settings -> API -ல் இதை கிடைக்கும்.
+   Database schema-க்கு "supabase-schema.sql" file-ஐ SQL Editor-ல் Run பண்ணவும்.
+===================================================================== */
+const SUPABASE_URL = "https://ecrizgqxluxcrudnynux.supabase.co";
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVjcml6Z3F4bHV4Y3J1ZG55bnV4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQyMjc0OTYsImV4cCI6MjA5OTgwMzQ5Nn0.YwmVhz1nHj8m-qJ7ZZu18KehKGWGiluwTjnJ1sKxLps";
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+/* =====================================================================
+   STATE
+===================================================================== */
+let currentUser = null;      // Supabase auth user (owner)
+let staffCache = {};         // {staffId: {...}}  (camelCase, mapped from DB rows)
+let attendanceCache = {};    // {staffId: {dateKey: {...}}}
+let advanceCache = {};       // {staffId: {id: {...}}}
+let incentiveCache = {};     // {staffId: {id: {...}}}
+let leaveCache = {};         // {leaveId: {...}}
+let settings = {
+  shopName:'என் கடை', shopAddress:'', gst:'', phone:'', logoUrl:'',
+  workingDays:26, shiftStart:'09:30', lateGrace:15, lateDeduction:50,
+  pfEnabled:false, esiEnabled:false, darkMode:false,
+  shopLat:null, shopLng:null, gpsRadius:50, paidLeave:false
+};
+let currentLang = localStorage.getItem('lang') || 'ta';
+let trendChartRef = null;
+let realtimeChannel = null;
+
+/* =====================================================================
+   I18N
+===================================================================== */
+const I18N = {
+  ta:{
+    appName:'ஊழியர் மேலாண்மை', appTag:'உங்கள் கடையின் ஊழியர்களை எளிதாக நிர்வகிக்கவும்',
+    ownerLogin:'உரிமையாளர்', staffLogin:'ஊழியர்', email:'மின்னஞ்சல்', password:'கடவுச்சொல்',
+    remember:'என்னை நினைவில் வை', forgot:'கடவுச்சொல் மறந்துவிட்டதா?', loginBtn:'உள்நுழை',
+    newOwner:'புதிய கடை உரிமையாளரா? பதிவு செய்யவும்', shopName:'கடையின் பெயர்',
+    createAccount:'கணக்கு உருவாக்கு', mobile:'மொபைல் எண்', staffPin:'4-இலக்க PIN',
+    staffPinNote:'குறிப்பு: உங்கள் PIN-ஐ கடை உரிமையாளரிடம் பெறவும்.',
+    dashboard:'டாஷ்போர்டு', greetSub:'இன்றைய கடையின் ஒரு பார்வை',
+    totalStaff:'மொத்த ஊழியர்கள்', presentToday:'இன்று வந்தவர்', absentToday:'இன்று வராதவர்',
+    lateToday:'தாமதமானவர்', todaySalaryCost:'இன்றைய சம்பள செலவு', monthSalaryCost:'இந்த மாத செலவு',
+    totalIncentives:'மொத்த ஊக்கத்தொகை', pendingAdvance:'நிலுவை முன்பணம்',
+    quickActions:'விரைவு செயல்கள்', addStaff:'ஊழியர் சேர்', attendance:'வருகை', salary:'சம்பளம்',
+    staffList:'ஊழியர் பட்டியல்', settings:'அமைப்புகள்', reports:'அறிக்கை',
+    monthlyTrend:'மாத சம்பள போக்கு', workedToday:'இன்று வேலை நேரம்',
+    checkIn:'Check In', checkOut:'Check Out', last7days:'சமீபத்திய வருகைப் பதிவு',
+    month:'மாதம்', advanceAmt:'முன்பணம் சேர்', addAdvanceBtn:'+ முன்பணம் சேர்',
+    incentiveAmt:'ஊக்கத்தொகை சேர்', incentiveReason:'காரணம்', addIncentiveBtn:'+ ஊக்கத்தொகை சேர்',
+    downloadSlip:'சம்பள சீட்டு PDF பதிவிறக்கு', companyInfo:'கடை விவரங்கள்',
+    shopAddress:'முகவரி', gst:'GST எண் (விருப்பம்)', phone:'தொலைபேசி எண்', logo:'லோகோ',
+    salaryRules:'சம்பள விதிகள்', workingDaysMonth:'மாதத்திற்கு வேலை நாட்கள்',
+    shiftStart:'ஷிப்ட் தொடக்கம்', lateAfter:'தாமதம் கிரேஸ் (நிமிடம்)',
+    lateDeductionPerDay:'தாமதத்திற்கு நாளொன்றுக்கு கழிவு (₹)', enablePF:'PF கழிவு இயக்கு (12%)',
+    enableESI:'ESI கழிவு இயக்கு (0.75%)', appPrefs:'பயன்பாட்டு விருப்பங்கள்',
+    darkModeLbl:'Dark Mode', saveSettings:'அமைப்புகளை சேமி', exportCSV:'இந்த மாத அறிக்கை (CSV)',
+    nDash:'முகப்பு', nStaff:'ஊழியர்', nAtt:'வருகை', nSal:'சம்பளம்', nSet:'அமைப்பு',
+    empId:'ஊழியர் ID', name:'பெயர்', photo:'புகைப்படம்', address:'முகவரி', aadhaar:'ஆதார் எண்',
+    doj:'சேர்ந்த தேதி', designation:'பதவி', monthlySalary:'மாத சம்பளம் (₹)', workingDays:'வேலை நாட்கள்',
+    shiftEnd:'ஷிப்ட் முடிவு', status:'நிலை', save:'சேமி',
+    leaveRequests:'விடுமுறை கோரிக்கைகள்', pendingRequests:'நிலுவையில் உள்ளவை', allRequests:'எல்லா கோரிக்கைகள்'
+  },
+  en:{
+    appName:'Staff Manager', appTag:'Manage your shop staff with ease',
+    ownerLogin:'Owner', staffLogin:'Staff', email:'Email', password:'Password',
+    remember:'Remember me', forgot:'Forgot password?', loginBtn:'Login',
+    newOwner:'New shop owner? Sign up', shopName:'Shop Name',
+    createAccount:'Create Account', mobile:'Mobile Number', staffPin:'4-digit PIN',
+    staffPinNote:'Note: Get your PIN from the shop owner.',
+    dashboard:'Dashboard', greetSub:"Today's snapshot of your shop",
+    totalStaff:'Total Staff', presentToday:'Present Today', absentToday:'Absent Today',
+    lateToday:'Late Today', todaySalaryCost:"Today's Salary Cost", monthSalaryCost:'Monthly Cost',
+    totalIncentives:'Total Incentives', pendingAdvance:'Pending Advance',
+    quickActions:'Quick Actions', addStaff:'Add Staff', attendance:'Attendance', salary:'Salary',
+    staffList:'Staff List', settings:'Settings', reports:'Reports',
+    monthlyTrend:'Monthly Salary Trend', workedToday:'worked today',
+    checkIn:'Check In', checkOut:'Check Out', last7days:'Recent Attendance',
+    month:'Month', advanceAmt:'Add Advance', addAdvanceBtn:'+ Add Advance',
+    incentiveAmt:'Add Incentive', incentiveReason:'Reason', addIncentiveBtn:'+ Add Incentive',
+    downloadSlip:'Download Salary Slip PDF', companyInfo:'Company Info',
+    shopAddress:'Address', gst:'GST Number (optional)', phone:'Phone Number', logo:'Logo',
+    salaryRules:'Salary Rules', workingDaysMonth:'Working Days / Month',
+    shiftStart:'Shift Start', lateAfter:'Late Grace (minutes)',
+    lateDeductionPerDay:'Late Deduction / Day (₹)', enablePF:'Enable PF Deduction (12%)',
+    enableESI:'Enable ESI Deduction (0.75%)', appPrefs:'App Preferences',
+    darkModeLbl:'Dark Mode', saveSettings:'Save Settings', exportCSV:'Export This Month (CSV)',
+    nDash:'Home', nStaff:'Staff', nAtt:'Attendance', nSal:'Salary', nSet:'Settings',
+    empId:'Employee ID', name:'Name', photo:'Photo', address:'Address', aadhaar:'Aadhaar Number',
+    doj:'Date of Joining', designation:'Designation', monthlySalary:'Monthly Salary (₹)', workingDays:'Working Days',
+    shiftEnd:'Shift End', status:'Status', save:'Save',
+    leaveRequests:'Leave Requests', pendingRequests:'Pending Requests', allRequests:'All Requests'
+  }
+};
+function applyLang(){
+  const dict = I18N[currentLang];
+  document.querySelectorAll('[data-i18n]').forEach(el=>{
+    const key = el.getAttribute('data-i18n');
+    if(dict[key]) el.textContent = dict[key];
+  });
+  document.documentElement.lang = currentLang;
+}
+function toggleLang(){
+  currentLang = currentLang === 'ta' ? 'en' : 'ta';
+  localStorage.setItem('lang', currentLang);
+  applyLang();
+}
+
+/* =====================================================================
+   UTIL
+===================================================================== */
+function toast(msg){
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  haptic(8);
+  clearTimeout(t._timer);
+  t._timer = setTimeout(()=>t.classList.remove('show'), 2400);
+}
+function todayKey(d=new Date()){ return d.toISOString().slice(0,10); }
+// Record-ஏ இல்லாத கடந்த நாட்களை (Sunday தவிர்த்து) "Absent"-ஆ கணக்கிட
+// உதவும் — Attendance Table-ல் Row இல்லாத நாட்கள் தற்போது எந்த
+// Stat-லும் Count ஆகாம விட்டுப்போச்சு, அதை சரி பண்ண.
+function countImplicitAbsentDays(recordedDatesSet, monthKey, uptoDateStr){
+  const [y,m] = monthKey.split('-').map(Number);
+  const daysInMonth = new Date(y, m, 0).getDate();
+  let count = 0;
+  for(let d=1; d<=daysInMonth; d++){
+    const dateStr = `${monthKey}-${String(d).padStart(2,'0')}`;
+    if(dateStr > uptoDateStr) break;
+    const dow = new Date(dateStr+'T00:00:00').getDay(); // 0 = ஞாயிறு
+    if(dow===0) continue;
+    if(!recordedDatesSet.has(dateStr)) count++;
+  }
+  return count;
+}
+function fmtMoney(n){ return '₹' + Math.round(n||0).toLocaleString('en-IN'); }
+function fmtTime(d){ return d.toTimeString().slice(0,5); }
+function minutesBetween(t1,t2){
+  const [h1,m1]=t1.split(':').map(Number), [h2,m2]=t2.split(':').map(Number);
+  return (h2*60+m2)-(h1*60+m1);
+}
+function openModal(id){ document.getElementById(id).classList.add('show'); }
+function closeModal(id){ document.getElementById(id).classList.remove('show'); }
+function togglePwVisibility(id, btn){
+  const el = document.getElementById(id);
+  if(el.type === 'password'){ el.type = 'text'; btn.innerHTML = '<span class="material-symbols-rounded">visibility_off</span>'; }
+  else { el.type = 'password'; btn.innerHTML = '<span class="material-symbols-rounded">visibility</span>'; }
+}
+
+/* =====================================================================
+   THEME
+===================================================================== */
+function toggleTheme(fromSettings){
+  const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+  const next = fromSettings ? document.getElementById('setDarkMode').checked : !isDark;
+  document.documentElement.setAttribute('data-theme', next ? 'dark':'light');
+  document.getElementById('setDarkMode').checked = next;
+  settings.darkMode = next;
+  localStorage.setItem('theme', next?'dark':'light');
+  updateThemeIcon(next);
+}
+function updateThemeIcon(isDark){
+  const btn = document.getElementById('themeToggleBtn');
+  if(btn) btn.innerHTML = `<span class="material-symbols-rounded">${isDark ? 'light_mode' : 'dark_mode'}</span>`;
+}
+(function initTheme(){
+  const saved = localStorage.getItem('theme');
+  if(saved==='dark') document.documentElement.setAttribute('data-theme','dark');
+})();
+
+/* =====================================================================
+   LOGIN TAB SWITCH
+===================================================================== */
+function switchLoginTab(which){
+  document.getElementById('ownerTabBtn').classList.toggle('active', which==='owner');
+  document.getElementById('staffTabBtn').classList.toggle('active', which==='staff');
+  document.getElementById('ownerLoginForm').style.display = which==='owner' ? 'block':'none';
+  document.getElementById('staffLoginForm').style.display = which==='staff' ? 'block':'none';
+}
+function toggleSignup(){
+  const b = document.getElementById('signupBlock');
+  b.style.display = b.style.display==='none' ? 'block':'none';
+}
+
+/* =====================================================================
+   AUTH: OWNER  (Supabase Auth — email/password)
+===================================================================== */
+async function ownerSignup(){
+  const shopName = document.getElementById('signupShopName').value.trim();
+  const email = document.getElementById('signupEmail').value.trim();
+  const pass = document.getElementById('signupPassword').value;
+  const errEl = document.getElementById('signupError');
+  const btn = document.getElementById('signupBtn');
+  errEl.textContent = '';
+  if(!shopName || !email || pass.length<6){
+    errEl.textContent = 'கடை பெயர், Email, 6+ எழுத்து கடவுச்சொல் அவசியம்.';
+    return;
+  }
+  btn.disabled = true;
+  const { data, error } = await sb.auth.signUp({ email, password: pass });
+  if(error){ errEl.textContent = translateAuthError(error); btn.disabled=false; return; }
+  // If email confirmation is OFF in Supabase settings, session is available immediately.
+  if(data.user){
+    await sb.from('shop_settings').upsert({ owner_id: data.user.id, shop_name: shopName });
+  }
+  btn.disabled = false;
+  toast('கணக்கு உருவாக்கப்பட்டது! Login செய்யவும் (அல்லது Email confirm பண்ணி பிறகு Login).');
+  toggleSignup();
+}
+async function ownerLogin(){
+  const email = document.getElementById('ownerEmail').value.trim();
+  const pass = document.getElementById('ownerPassword').value;
+  const errEl = document.getElementById('ownerLoginError');
+  const btn = document.getElementById('ownerLoginBtn');
+  errEl.textContent = '';
+  if(!email || !pass){ errEl.textContent = 'Email மற்றும் Password உள்ளிடவும்.'; return; }
+  btn.disabled = true;
+  const { error } = await sb.auth.signInWithPassword({ email, password: pass });
+  btn.disabled = false;
+  if(error){ errEl.textContent = translateAuthError(error); return; }
+  // "Remember me" -> Supabase persists session in localStorage by default.
+  // If unchecked, we simply won't restore it on next visit (cleared on logout anyway).
+  if(!document.getElementById('rememberMe').checked){
+    sessionStorage.setItem('noRemember','1');
+  }
+}
+async function forgotPassword(){
+  const email = document.getElementById('ownerEmail').value.trim();
+  if(!email){ toast('முதலில் Email உள்ளிடவும்'); return; }
+  const { error } = await sb.auth.resetPasswordForEmail(email);
+  if(error){ toast(translateAuthError(error)); return; }
+  toast('Password reset link உங்கள் email-க்கு அனுப்பப்பட்டது');
+}
+function translateAuthError(e){
+  const msg = (e && e.message) || '';
+  if(msg.includes('Invalid login credentials')) return 'Email அல்லது கடவுச்சொல் தவறு.';
+  if(msg.includes('already registered')) return 'இந்த Email ஏற்கனவே பதிவு செய்யப்பட்டுள்ளது.';
+  if(msg.includes('Password should be')) return 'கடவுச்சொல் மிகவும் எளிது (6+ எழுத்து வேண்டும்).';
+  if(msg.includes('rate limit')) return 'கொஞ்ச நேரம் கழித்து முயற்சிக்கவும்.';
+  return msg || 'ஏதோ தவறு நடந்தது.';
+}
+
+/* =====================================================================
+   AUTH: STAFF (mobile + PIN via staff_login RPC — see supabase-schema.sql)
+   Staff-க்கு auth.users account கிடையாது; mobile+pin-ஐ session-ல் வெச்சு
+   ஒவ்வொரு RPC call-லும் அனுப்புவோம் (staff_self_checkin/out ஆகியவை
+   server-side இதை மறுபடி சரிபார்க்கும்).
+===================================================================== */
+let staffSession = null; // {shopUid, staffId, name, mobile, pin}
+
+async function staffLogin(){
+  const mobile = document.getElementById('staffMobile').value.trim();
+  const pin = document.getElementById('staffPin').value.trim();
+  const errEl = document.getElementById('staffLoginError');
+  errEl.textContent = '';
+  if(mobile.length<10 || pin.length!==4){ errEl.textContent='சரியான மொபைல் மற்றும் 4-இலக்க PIN உள்ளிடவும்.'; return; }
+  const { data, error } = await sb.rpc('staff_login', { p_mobile: mobile, p_pin: pin });
+  if(error){ errEl.textContent = error.message; return; }
+  if(!data || data.length===0){ errEl.textContent = 'மொபைல் எண் அல்லது PIN தவறு.'; return; }
+  const s = data[0];
+  staffSession = {shopUid:s.owner_id, staffId:s.id, name:s.name, mobile, pin};
+  localStorage.setItem('staffSession', JSON.stringify(staffSession));
+  showStaffApp();
+}
+async function showStaffApp(){
+  document.getElementById('loginScreen').style.display='none';
+  document.getElementById('app').style.display='none';
+  document.getElementById('staffApp').style.display='block';
+  document.getElementById('staffAppName').textContent = staffSession.name;
+  document.getElementById('staffAppDate').textContent = new Date().toLocaleDateString(currentLang==='ta'?'ta-IN':'en-IN', {day:'numeric', month:'short', year:'numeric'});
+  document.getElementById('myMonthPicker').value = new Date().toISOString().slice(0,7);
+  await refreshStaffAllData(false);
+}
+async function refreshStaffAllData(showToast){
+  if(!staffSession) return;
+  if(showToast) toast('புதுப்பிக்கப்படுகிறது...');
+  await refreshStaffStatus();
+  await loadStaffLeaves();
+  await loadMyMonthData();
+  if(showToast) toast('Latest Data வந்துவிட்டது ✅');
+}
+// Owner ஏதாவது பழைய Records-ஐ Edit பண்ணா, Staff தன் App-ஐ மறுபடி
+// Foreground-க்கு கொண்டு வரும்போது (Tab Switch பண்ணி திரும்பி வரும்போது,
+// அல்லது Screen Lock திறக்கும்போது) தானா Latest Data Refresh ஆகும்.
+document.addEventListener('visibilitychange', ()=>{
+  if(document.visibilityState === 'visible' && staffSession){
+    refreshStaffAllData(false);
+  }
+});
+function staffLogout(){
+  localStorage.removeItem('staffSession');
+  staffSession = null;
+  document.getElementById('staffApp').style.display='none';
+  document.getElementById('loginScreen').style.display='flex';
+}
+function loadStaffSessionOnStart(){
+  const raw = localStorage.getItem('staffSession');
+  if(!raw) return;
+  try{
+    const s = JSON.parse(raw);
+    if(s && s.mobile && s.pin){ staffSession = s; showStaffApp(); }
+  }catch(e){}
+}
+
+async function refreshStaffStatus(){
+  if(!staffSession) return;
+  const dial=document.getElementById('sDial'), hoursTxt=document.getElementById('sHoursTxt'), statusLine=document.getElementById('sStatusLine');
+  const btnIn=document.getElementById('sBtnIn'), btnOut=document.getElementById('sBtnOut');
+  const btnBreakOut=document.getElementById('sBtnBreakOut'), btnBreakIn=document.getElementById('sBtnBreakIn');
+  const previewCard=document.getElementById('sSelfiePreviewCard');
+  const { data, error } = await sb.rpc('staff_today_status', {p_mobile: staffSession.mobile, p_pin: staffSession.pin});
+  const r = (!error && data && data.length>0) ? data[0] : null;
+  if(!r || !r.check_in){
+    dial.style.setProperty('--pct',0); hoursTxt.textContent='0.0h';
+    statusLine.textContent='இன்னும் Check In செய்யவில்லை';
+    btnIn.disabled=false; btnOut.disabled=true;
+    btnBreakOut.style.display='none'; btnBreakIn.style.display='none';
+    previewCard.style.display='none';
+    document.getElementById('sBreaksWrap').style.display='none';
+    return;
+  }
+  if(r.check_in && !r.check_out){
+    const mins = minutesBetween(r.check_in, fmtTime(new Date()));
+    const hrs = Math.max(0, mins/60);
+    dial.style.setProperty('--pct', Math.min(100,(hrs/9)*100));
+    hoursTxt.textContent = hrs.toFixed(1)+'h';
+    statusLine.textContent = `Check In: ${r.check_in} • ${r.status}`;
+    btnIn.disabled=true; btnOut.disabled=false;
+  } else {
+    const hrs = r.working_hours||0;
+    dial.style.setProperty('--pct', Math.min(100,(hrs/9)*100));
+    hoursTxt.textContent = hrs.toFixed(1)+'h';
+    statusLine.textContent = `${r.check_in} → ${r.check_out} • ${r.status}`;
+    btnIn.disabled=true; btnOut.disabled=true;
+    btnBreakOut.style.display='none'; btnBreakIn.style.display='none';
+  }
+  if(r.selfie_url){
+    document.getElementById('sSelfiePreview').src = r.selfie_url;
+    previewCard.style.display='block';
+  } else {
+    previewCard.style.display='none';
+  }
+  if(!r.check_out) loadStaffBreaks();
+}
+
+/* =====================================================================
+   STAFF: PERMISSION OUT & BACK (Break tracking — no salary impact,
+   Owner-க்கு Visibility மட்டும்)
+===================================================================== */
+async function loadStaffBreaks(){
+  if(!staffSession) return;
+  const { data, error } = await sb.rpc('staff_today_breaks', {p_mobile: staffSession.mobile, p_pin: staffSession.pin});
+  const btnBreakOut=document.getElementById('sBtnBreakOut'), btnBreakIn=document.getElementById('sBtnBreakIn');
+  const wrap = document.getElementById('sBreaksWrap');
+  if(error){ return; }
+  const rows = data || [];
+  const openBreak = rows.find(b=>!b.in_time);
+  if(openBreak){
+    btnBreakOut.style.display='none'; btnBreakIn.style.display='block';
+  } else {
+    btnBreakOut.style.display='block'; btnBreakIn.style.display='none';
+  }
+  if(rows.length===0){ wrap.style.display='none'; return; }
+  wrap.style.display='block';
+  wrap.innerHTML = `<div style="font-weight:700; font-size:13px; margin-bottom:8px; display:flex; align-items:center; gap:6px;"><span class="material-symbols-rounded" style="font-size:18px;">directions_walk</span>இன்று வெளியே போனது</div>` +
+    rows.map(b=>`
+      <div class="att-list-item">
+        <div style="font-size:12.5px;">${b.out_time} → ${b.in_time || '<span style="color:var(--marigold-dark); font-weight:700;">இன்னும் வெளியே</span>'}</div>
+      </div>
+    `).join('');
+}
+async function staffBreakOut(){
+  const { data, error } = await sb.rpc('staff_break_out', {p_mobile: staffSession.mobile, p_pin: staffSession.pin, p_reason:''});
+  if(error){ toast(error.message); return; }
+  const r = (data && data[0]) || {};
+  if(r.msg !== 'ok'){ toast(r.msg || 'பிழை'); return; }
+  toast('வெளியே போறீங்க ✅ '+r.result_time);
+  loadStaffBreaks();
+}
+async function staffBreakIn(){
+  const { data, error } = await sb.rpc('staff_break_in', {p_mobile: staffSession.mobile, p_pin: staffSession.pin});
+  if(error){ toast(error.message); return; }
+  const r = (data && data[0]) || {};
+  if(r.msg !== 'ok'){ toast(r.msg || 'பிழை'); return; }
+  toast('வரவேற்கிறோம் திரும்ப ✅ '+r.result_time);
+  loadStaffBreaks();
+}
+
+let cameraStream = null;
+
+async function triggerSelfieCapture(){
+  if(!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia){
+    toast('Camera இந்த browser-ல் support ஆகல, Gallery-ல் இருந்து தேர்வு செய்யுங்க');
+    fallbackFilePicker();
+    return;
+  }
+  // முந்தைய stream ஏதாவது release ஆகாம இருந்தா, அதுதான் "camera busy"
+  // error-க்கு காரணமா இருக்கலாம் — முதலில் நிச்சயமா stop பண்றோம்.
+  if(cameraStream){ cameraStream.getTracks().forEach(t=>t.stop()); cameraStream=null; }
+  try{
+    cameraStream = await navigator.mediaDevices.getUserMedia({ video:{ facingMode:'user' }, audio:false });
+    document.getElementById('cameraVideo').srcObject = cameraStream;
+    openModal('cameraModal');
+  }catch(e){
+    console.warn('Camera error:', e.name, e.message);
+    if(e.name === 'NotAllowedError'){
+      toast('Camera அனுமதி Block ஆகியிருக்கு — Browser Settings-ல் Camera Allow பண்ணி மறுபடி முயற்சி செய்யுங்க');
+    } else if(e.name === 'NotReadableError'){
+      toast('Camera வேறு App-ல் Busy-ஆ இருக்கு — மற்ற Apps Close பண்ணி மறுபடி முயற்சி செய்யுங்க');
+    } else {
+      toast('Camera திறக்க முடியல ('+e.name+') — Gallery-ல் இருந்து தேர்வு செய்யுங்க');
+    }
+    fallbackFilePicker();
+  }
+}
+function closeCameraModal(){
+  if(cameraStream){ cameraStream.getTracks().forEach(t=>t.stop()); cameraStream = null; }
+  closeModal('cameraModal');
+}
+function fallbackFilePicker(){
+  closeCameraModal();
+  // capture="user" -ஐ இப்போ மறுபடி முன்னுரிமையா வைக்கிறோம் — Camera-ஐ
+  // முதலில் Suggest பண்ணும் (Gallery-ஐ முழுசா Block பண்ணாது, ஆனா
+  // Camera app-ஐயே திறக்க முயற்சி பண்ணும்). கீழே freshness-check
+  // Gallery Photo எடுத்தாலும் Owner-க்கு தெரிய வைக்கும்.
+  const input = document.getElementById('staffSelfieInput');
+  input.setAttribute('capture', 'user');
+  input.click();
+}
+function captureSelfieShot(){
+  const video = document.getElementById('cameraVideo');
+  const canvas = document.getElementById('cameraCanvas');
+  canvas.width = video.videoWidth || 480;
+  canvas.height = video.videoHeight || 640;
+  canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
+  canvas.toBlob(blob=>{
+    closeCameraModal();
+    if(blob) uploadSelfieAndCheckin(blob, false); // in-browser camera = definitely live
+  }, 'image/jpeg', 0.85);
+}
+function onSelfieFilePicked(e){
+  const file = e.target.files[0];
+  e.target.value = '';
+  if(!file) return;
+  // Freshness heuristic: file "lastModified" சமீபத்தியது இல்லைன்னா
+  // (5 நிமிடத்திற்கு மேல் பழையது), Gallery-ல் இருந்து ஏற்கனவே இருந்த
+  // Photo-வை தேர்ந்தெடுத்திருக்கலாம் — Owner-க்கு தெரிய Flag பண்றோம்.
+  const ageMs = Date.now() - (file.lastModified || Date.now());
+  const viaGallery = ageMs > 5*60*1000;
+  if(viaGallery){
+    toast('⚠️ இது சமீபத்திய Selfie இல்லை போல் தெரியுது — Owner இதை பார்க்கும்போது Gallery Photo-ன்னு தெரியும்');
+  }
+  uploadSelfieAndCheckin(file, viaGallery);
+}
+async function uploadSelfieAndCheckin(fileOrBlob, viaGallery){
+  if(!staffSession) return;
+  toast('Selfie upload செய்யப்படுகிறது...');
+  try{
+    const path = `selfies/${staffSession.staffId}-${Date.now()}.jpg`;
+    const { error: upErr } = await sb.storage.from('staff-media').upload(path, fileOrBlob, {upsert:true, contentType:'image/jpeg'});
+    if(upErr) throw upErr;
+    const { data: pub } = sb.storage.from('staff-media').getPublicUrl(path);
+    captureGpsThenCheckin(pub.publicUrl, !!viaGallery);
+  }catch(err){
+    toast('பிழை: '+(err.message||err));
+  }
+}
+function captureGpsThenCheckin(selfieUrl, viaGallery){
+  if(navigator.geolocation){
+    navigator.geolocation.getCurrentPosition(
+      pos=>doStaffCheckin(selfieUrl, pos.coords.latitude, pos.coords.longitude, viaGallery),
+      ()=>doStaffCheckin(selfieUrl, null, null, viaGallery),
+      {timeout:5000}
+    );
+  } else doStaffCheckin(selfieUrl, null, null, viaGallery);
+}
+async function doStaffCheckin(selfieUrl, lat, lng, viaGallery){
+  const { data, error } = await sb.rpc('staff_self_checkin', {
+    p_mobile: staffSession.mobile, p_pin: staffSession.pin,
+    p_selfie_url: selfieUrl, p_lat: lat, p_lng: lng, p_via_gallery: !!viaGallery
+  });
+  if(error){ toast(error.message); return; }
+  const r = (data && data[0]) || {};
+  if(r.msg !== 'ok'){ toast(r.msg || 'பிழை'); return; }
+  toast('Check In ✅ '+r.result_time+' ('+r.result_status+')');
+  refreshStaffStatus();
+}
+async function staffDoCheckout(){
+  const { data, error } = await sb.rpc('staff_self_checkout', {p_mobile: staffSession.mobile, p_pin: staffSession.pin});
+  if(error){ toast(error.message); return; }
+  const r = (data && data[0]) || {};
+  if(r.msg !== 'ok'){ toast(r.msg || 'பிழை'); return; }
+  toast('Check Out ✅ '+r.result_time+' ('+r.hours+'h)');
+  refreshStaffStatus();
+}
+
+/* =====================================================================
+   STAFF: LEAVE APPLY + HISTORY
+===================================================================== */
+function openLeaveApplyModal(){
+  document.getElementById('leaveDateF').value = todayKey();
+  document.getElementById('leaveTypeF').value = 'Full';
+  document.getElementById('leaveReasonF').value = '';
+  openModal('leaveApplyModal');
+}
+async function submitLeaveApplication(){
+  if(!staffSession) return;
+  const date = document.getElementById('leaveDateF').value;
+  const dayType = document.getElementById('leaveTypeF').value;
+  const reason = document.getElementById('leaveReasonF').value.trim();
+  if(!date){ toast('தேதியை தேர்வு செய்யவும்'); return; }
+  const { data, error } = await sb.rpc('staff_apply_leave', {
+    p_mobile: staffSession.mobile, p_pin: staffSession.pin,
+    p_date: date, p_day_type: dayType, p_reason: reason
+  });
+  if(error){ toast(error.message); return; }
+  const r = (data && data[0]) || {};
+  if(r.msg !== 'ok'){ toast(r.msg || 'பிழை'); return; }
+  closeModal('leaveApplyModal');
+  toast('விடுமுறை விண்ணப்பிக்கப்பட்டது ✅');
+  await loadStaffLeaves();
+  loadMyMonthData();
+}
+async function loadStaffLeaves(){
+  if(!staffSession) return;
+  const wrap = document.getElementById('staffLeaveListWrap');
+  const { data, error } = await sb.rpc('staff_my_leaves', {p_mobile: staffSession.mobile, p_pin: staffSession.pin});
+  myLeavesCache = (!error && data) ? data : [];
+  if(error || !data || data.length===0){
+    wrap.innerHTML = `<div class="empty-state"><div class="ei"><span class="material-symbols-rounded">edit_note</span></div><div>விடுமுறை கோரிக்கைகள் இல்லை</div></div>`;
+    return;
+  }
+  wrap.innerHTML = data.map(l=>`
+    <div class="leave-row">
+      <div>
+        <div class="lname">${l.date}</div>
+        <div class="lmeta">${l.day_type==='Half'?'அரை நாள்':'முழு நாள்'}${l.reason?(' • '+l.reason):''}</div>
+      </div>
+      <span class="status-pill status-${l.status}">${l.status}</span>
+    </div>
+  `).join('');
+}
+
+/* =====================================================================
+   STAFF: MY MONTHLY SUMMARY (Present/Late/Absent/Leave + day list)
+===================================================================== */
+let myLeavesCache = [];
+async function loadMyMonthData(){
+  if(!staffSession) return;
+  const monthKey = document.getElementById('myMonthPicker').value;
+  const listWrap = document.getElementById('myAttendanceListWrap');
+  const { data, error } = await sb.rpc('staff_my_attendance', {
+    p_mobile: staffSession.mobile, p_pin: staffSession.pin, p_month: monthKey
+  });
+  if(error){ toast(error.message); return; }
+  const rows = data || [];
+
+  let present=0, late=0, halfDay=0, absent=0, earlyDays=0, totalEarlyMin=0, totalOvertimeHrs=0;
+  rows.forEach(r=>{
+    if(r.status==='Present') present++;
+    else if(r.status==='Late'){ present++; late++; }
+    else if(r.status==='HalfDay') halfDay++;
+    else if(r.status==='Absent') absent++;
+    if(r.early_minutes>0){ earlyDays++; totalEarlyMin += r.early_minutes; }
+    totalOvertimeHrs += Number(r.overtime||0);
+  });
+  // Attendance-ஏ Mark ஆகாத (Record இல்லாத) கடந்த நாட்களும் Absent-ல் சேர்க்கிறோம்
+  const recordedDates = new Set(rows.map(r=>r.date));
+  absent += countImplicitAbsentDays(recordedDates, monthKey, todayKey());
+  document.getElementById('myPresent').textContent = present;
+  document.getElementById('myLate').textContent = late;
+  document.getElementById('myHalfDay').textContent = halfDay;
+  document.getElementById('myAbsent').textContent = absent;
+  const leaveApproved = myLeavesCache.filter(l=> l.status==='Approved' && (l.date||'').startsWith(monthKey)).length;
+  document.getElementById('myLeaveCount').textContent = leaveApproved;
+
+  const punctWrap = document.getElementById('myPunctualityWrap');
+  if(earlyDays>0 || totalOvertimeHrs>0){
+    punctWrap.style.display = 'block';
+    punctWrap.innerHTML = `
+      ${earlyDays>0 ? `<div style="font-size:12.5px; margin-bottom:4px;">🌅 சீக்கிரம் வந்த நாட்கள்: <b>${earlyDays}</b> (மொத்தம் ${totalEarlyMin} நிமிடங்கள்)</div>` : ''}
+      ${totalOvertimeHrs>0 ? `<div style="font-size:12.5px;">⏱️ மொத்த Overtime: <b>${totalOvertimeHrs.toFixed(1)} மணி நேரம்</b></div>` : ''}
+    `;
+  } else {
+    punctWrap.style.display = 'none';
+  }
+
+  listWrap.innerHTML = rows.length ? rows.map(r=>`
+    <div class="att-list-item">
+      <div>
+        <div style="font-weight:600; font-size:13px;">${r.date}</div>
+        <div style="font-size:11.5px; color:var(--muted);">${r.check_in||'--'} → ${r.check_out||'--'}${r.late_minutes ? ' • தாமதம் '+r.late_minutes+' நிமி' : ''}${r.early_minutes ? ' • சீக்கிரம் '+r.early_minutes+' நிமி' : ''}</div>
+      </div>
+      <span class="status-pill status-${r.status}">${r.status}</span>
+    </div>
+  `).join('') : `<div class="empty-state"><div class="ei"><span class="material-symbols-rounded">calendar_month</span></div><div>இந்த மாதம் பதிவுகள் இல்லை</div></div>`;
+}
+
+/* =====================================================================
+   AUTH STATE
+===================================================================== */
+sb.auth.onAuthStateChange((event, session)=>{
+  if(session && session.user){
+    currentUser = session.user;
+    document.getElementById('loginScreen').style.display='none';
+    document.getElementById('staffApp').style.display='none';
+    document.getElementById('app').style.display='block';
+    bootstrapShopData();
+  } else {
+    currentUser = null;
+    if(realtimeChannel){ sb.removeChannel(realtimeChannel); realtimeChannel=null; }
+    document.getElementById('app').style.display='none';
+    if(!staffSession){
+      document.getElementById('loginScreen').style.display='flex';
+    }
+  }
+});
+async function logout(){ await sb.auth.signOut(); }
+
+/* =====================================================================
+   DB <-> APP MAPPING HELPERS (snake_case rows -> camelCase cache)
+===================================================================== */
+function mapStaffRow(r){
+  return {
+    id:r.id, empId:r.emp_id, name:r.name, mobile:r.mobile, pin:r.pin, photoUrl:r.photo_url,
+    address:r.address, aadhaar:r.aadhaar, doj:r.doj, designation:r.designation,
+    monthlySalary:r.monthly_salary, dailySalary:r.daily_salary, workingDays:r.working_days,
+    shiftStart:r.shift_start, shiftEnd:r.shift_end, status:r.status
+  };
+}
+function mapAttRow(r){
+  return {
+    id:r.id, staffId:r.staff_id, checkIn:r.check_in, checkOut:r.check_out, status:r.status,
+    lateMinutes:r.late_minutes, earlyMinutes:r.early_minutes||0, workingHours:r.working_hours, overtime:r.overtime,
+    device:r.device, selfieUrl:r.selfie_url || '', selfieViaGallery:!!r.selfie_via_gallery,
+    gps: (r.gps_lat!=null) ? {lat:r.gps_lat, lng:r.gps_lng} : null
+  };
+}
+
+/* =====================================================================
+   BOOTSTRAP DATA (initial fetch + Supabase Realtime subscriptions)
+===================================================================== */
+async function bootstrapShopData(){
+  document.getElementById('todayDateLbl').textContent = new Date().toLocaleDateString(currentLang==='ta'?'ta-IN':'en-IN', {day:'numeric', month:'short', year:'numeric'});
+  warmTamilFont();
+  const uid = currentUser.id;
+
+  document.getElementById('dashSkeleton').style.display = 'grid';
+  document.getElementById('dashStatGrid').style.display = 'none';
+
+  await loadSettings(uid);
+  await loadStaff(uid);
+  await loadAttendance(uid);
+  await loadAdvances(uid);
+  await loadIncentives(uid);
+  await loadLeaves(uid);
+
+  document.getElementById('dashSkeleton').style.display = 'none';
+  document.getElementById('dashStatGrid').style.display = 'grid';
+
+  const m = new Date().toISOString().slice(0,7);
+  document.getElementById('salMonth').value = m;
+
+  // Live cloud sync: subscribe once to all 5 tables for this owner
+  if(realtimeChannel) sb.removeChannel(realtimeChannel);
+  realtimeChannel = sb.channel('shop-'+uid)
+    .on('postgres_changes', {event:'*', schema:'public', table:'shop_settings', filter:`owner_id=eq.${uid}`}, ()=>loadSettings(uid))
+    .on('postgres_changes', {event:'*', schema:'public', table:'staff', filter:`owner_id=eq.${uid}`}, ()=>loadStaff(uid))
+    .on('postgres_changes', {event:'*', schema:'public', table:'attendance', filter:`owner_id=eq.${uid}`}, ()=>loadAttendance(uid))
+    .on('postgres_changes', {event:'*', schema:'public', table:'advances', filter:`owner_id=eq.${uid}`}, ()=>loadAdvances(uid))
+    .on('postgres_changes', {event:'*', schema:'public', table:'incentives', filter:`owner_id=eq.${uid}`}, ()=>loadIncentives(uid))
+    .on('postgres_changes', {event:'*', schema:'public', table:'leaves', filter:`owner_id=eq.${uid}`}, ()=>loadLeaves(uid))
+    .subscribe();
+}
+
+async function loadSettings(uid){
+  let { data, error } = await sb.from('shop_settings').select('*').eq('owner_id', uid).maybeSingle();
+  if(error){ toast(error.message); return; }
+  if(!data){
+    // First login safety net: create default settings row if missing
+    const insert = { owner_id: uid };
+    await sb.from('shop_settings').upsert(insert);
+    data = insert;
+  }
+  settings = {
+    shopName:data.shop_name||'என் கடை', shopAddress:data.shop_address||'', gst:data.gst||'',
+    phone:data.phone||'', logoUrl:data.logo_url||'', workingDays:data.working_days||26,
+    shiftStart:data.shift_start||'09:30', lateGrace:data.late_grace||15,
+    lateDeduction:data.late_deduction||50, pfEnabled:!!data.pf_enabled, esiEnabled:!!data.esi_enabled,
+    shopLat: data.shop_lat!=null ? Number(data.shop_lat) : null,
+    shopLng: data.shop_lng!=null ? Number(data.shop_lng) : null,
+    gpsRadius: data.gps_radius || 50,
+    paidLeave: !!data.paid_leave
+  };
+  document.getElementById('companyNameLbl').textContent = settings.shopName;
+  document.getElementById('companyLogoChip').innerHTML = settings.logoUrl ? `<img src="${settings.logoUrl}">` : '<span class="material-symbols-rounded">storefront</span>';
+  document.getElementById('setShopName').value = settings.shopName;
+  document.getElementById('setShopAddress').value = settings.shopAddress;
+  document.getElementById('setGST').value = settings.gst;
+  document.getElementById('setPhone').value = settings.phone;
+  document.getElementById('setWorkingDays').value = settings.workingDays;
+  document.getElementById('setShiftStart').value = settings.shiftStart;
+  document.getElementById('setLateGrace').value = settings.lateGrace;
+  document.getElementById('setLateDeduction').value = settings.lateDeduction;
+  document.getElementById('setPFEnabled').checked = settings.pfEnabled;
+  document.getElementById('setESIEnabled').checked = settings.esiEnabled;
+  document.getElementById('setPaidLeave').checked = settings.paidLeave;
+  document.getElementById('setGpsRadius').value = settings.gpsRadius;
+  if(settings.shopLat!=null && settings.shopLng!=null){
+    document.getElementById('setShopLat').value = settings.shopLat;
+    document.getElementById('setShopLng').value = settings.shopLng;
+    document.getElementById('setShopLocDisplay').textContent = `📍 Set ஆகியுள்ளது: ${settings.shopLat.toFixed(5)}, ${settings.shopLng.toFixed(5)} (ஆரம் ${settings.gpsRadius}மீ)`;
+  } else {
+    document.getElementById('setShopLocDisplay').textContent = 'Location இன்னும் Set செய்யப்படவில்லை — யாராலும் எங்கிருந்தும் Check In பண்ணலாம்';
+  }
+  renderDashboard();
+}
+async function loadStaff(uid){
+  const { data, error } = await sb.from('staff').select('*').eq('owner_id', uid).order('created_at');
+  if(error){ toast(error.message); return; }
+  staffCache = {};
+  (data||[]).forEach(r=> staffCache[r.id] = mapStaffRow(r));
+  renderStaffList();
+  populateStaffSelects();
+  renderDashboard();
+}
+async function loadAttendance(uid){
+  const { data, error } = await sb.from('attendance').select('*').eq('owner_id', uid);
+  if(error){ toast(error.message); return; }
+  attendanceCache = {};
+  (data||[]).forEach(r=>{
+    if(!attendanceCache[r.staff_id]) attendanceCache[r.staff_id] = {};
+    attendanceCache[r.staff_id][r.date] = mapAttRow(r);
+  });
+  renderDashboard(); refreshAttendanceHero(); renderAttendanceHistory();
+}
+async function loadAdvances(uid){
+  const { data, error } = await sb.from('advances').select('*').eq('owner_id', uid);
+  if(error){ toast(error.message); return; }
+  advanceCache = {};
+  (data||[]).forEach(r=>{
+    if(!advanceCache[r.staff_id]) advanceCache[r.staff_id] = {};
+    advanceCache[r.staff_id][r.id] = {amount:r.amount, date:r.date, reason:r.reason, settled:r.settled};
+  });
+  renderDashboard(); computeSalaryUI();
+}
+async function loadIncentives(uid){
+  const { data, error } = await sb.from('incentives').select('*').eq('owner_id', uid);
+  if(error){ toast(error.message); return; }
+  incentiveCache = {};
+  (data||[]).forEach(r=>{
+    if(!incentiveCache[r.staff_id]) incentiveCache[r.staff_id] = {};
+    incentiveCache[r.staff_id][r.id] = {amount:r.amount, date:r.date, type:r.type};
+  });
+  renderDashboard(); computeSalaryUI();
+}
+async function loadLeaves(uid){
+  const { data, error } = await sb.from('leaves').select('*').eq('owner_id', uid).order('date', {ascending:false});
+  if(error){ toast(error.message); return; }
+  leaveCache = {};
+  (data||[]).forEach(r=> leaveCache[r.id] = {staffId:r.staff_id, date:r.date, dayType:r.day_type, reason:r.reason, status:r.status});
+  renderDashboard();
+  renderLeavePage();
+}
+function renderLeavePage(){
+  const pendingWrap = document.getElementById('leavePendingWrap');
+  const allWrap = document.getElementById('leaveAllWrap');
+  if(!pendingWrap || !allWrap) return;
+  const entries = Object.entries(leaveCache);
+  const pending = entries.filter(([id,l])=>l.status==='Pending');
+  const rowHtml = (id,l,showActions)=>{
+    const s = staffCache[l.staffId] || {};
+    return `<div class="leave-row">
+      <div>
+        <div class="lname">${s.name||'—'}</div>
+        <div class="lmeta">${l.date} • ${l.dayType==='Half'?'அரை நாள்':'முழு நாள்'}${l.reason?(' • '+l.reason):''}</div>
+      </div>
+      ${showActions ? `
+        <div class="leave-actions">
+          <button class="btn-approve" onclick="haptic(); approveLeave('${id}')"><span class="material-symbols-rounded">check</span> Approve</button>
+          <button class="btn-reject" onclick="haptic(); rejectLeave('${id}')"><span class="material-symbols-rounded">close</span> Reject</button>
+        </div>` : `<span class="status-pill status-${l.status}">${l.status}</span>`
+      }
+    </div>`;
+  };
+  pendingWrap.innerHTML = pending.length
+    ? pending.map(([id,l])=>rowHtml(id,l,true)).join('')
+    : `<div class="empty-state"><div class="ei"><span class="material-symbols-rounded">task_alt</span></div><div>நிலுவையில் கோரிக்கைகள் இல்லை</div></div>`;
+  allWrap.innerHTML = entries.length
+    ? entries.map(([id,l])=>rowHtml(id,l,false)).join('')
+    : `<div class="empty-state"><div class="ei"><span class="material-symbols-rounded">edit_note</span></div><div>கோரிக்கைகள் இல்லை</div></div>`;
+}
+async function approveLeave(id){
+  const leave = leaveCache[id];
+  const { error } = await sb.from('leaves').update({status:'Approved'}).eq('id', id);
+  if(error){ toast(error.message); return; }
+
+  // Approve ஆனதும், அந்த நாளை Attendance-ல் "Leave"/"HalfDayLeave" ஆக பதிவு
+  // பண்றோம் — இல்லைன்னா Dashboard-ல் தவறா "Absent" ஆக காட்டிடும்.
+  if(leave){
+    const attStatus = leave.dayType==='Half' ? 'HalfDayLeave' : 'Leave';
+    const row = {
+      owner_id: currentUser.id, staff_id: leave.staffId, date: leave.date,
+      check_in: null, check_out: null, status: attStatus,
+      working_hours: leave.dayType==='Half' ? 4 : 8,
+      late_minutes: 0, early_minutes: 0, device: 'owner-leave-approval'
+    };
+    const { error: attErr } = await sb.from('attendance').upsert(row, {onConflict:'staff_id,date'});
+    if(attErr) console.warn('Attendance auto-mark for leave failed:', attErr);
+    await loadAttendance(currentUser.id);
+  }
+  toast('Leave Approve செய்யப்பட்டது ✅');
+  loadLeaves(currentUser.id);
+}
+async function rejectLeave(id){
+  const { error } = await sb.from('leaves').update({status:'Rejected'}).eq('id', id);
+  if(error){ toast(error.message); return; }
+  toast('Leave Reject செய்யப்பட்டது');
+  loadLeaves(currentUser.id);
+}
+
+/* =====================================================================
+   NAVIGATION
+===================================================================== */
+function goPage(name){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.getElementById('page-'+name).classList.add('active');
+  document.querySelectorAll('nav.bottomnav button').forEach(b=>b.classList.toggle('active', b.dataset.page===name));
+  document.getElementById('staffFab').style.display = name==='staff' ? 'flex':'none';
+  if(name==='attendance') refreshAttendanceHero();
+  if(name==='salary') computeSalaryUI();
+  if(name==='leave') renderLeavePage();
+}
+document.getElementById('staffFab').style.display='none';
+
+/* =====================================================================
+   DASHBOARD
+===================================================================== */
+function renderDashboard(){
+  const staffList = Object.entries(staffCache);
+  const activeStaff = staffList.filter(([id,s])=>s.status!=='Inactive');
+  document.getElementById('stTotalStaff').textContent = activeStaff.length;
+
+  const tKey = todayKey();
+  let present=0, absent=0, late=0, halfDayToday=0, todayCost=0;
+  activeStaff.forEach(([id,s])=>{
+    const rec = (attendanceCache[id]||{})[tKey];
+    const perDay = (s.dailySalary && Number(s.dailySalary)>0) ? Number(s.dailySalary) : (Number(s.monthlySalary||0) / (Number(s.workingDays)||settings.workingDays||26));
+    if(rec){
+      if(rec.status==='Present'){ present++; todayCost += perDay; }
+      else if(rec.status==='Late'){ present++; late++; todayCost += perDay; }
+      else if(rec.status==='HalfDay'){ present++; halfDayToday++; todayCost += perDay/2; }
+      else if(rec.status==='Absent'){ absent++; }
+      else if(rec.status==='Leave'){ if(settings.paidLeave) todayCost += perDay; }
+      else if(rec.status==='HalfDayLeave'){ halfDayToday++; if(settings.paidLeave) todayCost += perDay/2; }
+    } else {
+      absent++;
+    }
+  });
+  document.getElementById('stPresent').textContent = present;
+  document.getElementById('stAbsent').textContent = absent;
+  document.getElementById('stLate').textContent = late;
+  document.getElementById('stHalfDay').textContent = halfDayToday;
+  document.getElementById('stTodayCost').textContent = fmtMoney(todayCost);
+
+  const mKey = tKey.slice(0,7);
+  let monthCost = 0;
+  activeStaff.forEach(([id,s])=>{
+    const perDay = (s.dailySalary && Number(s.dailySalary)>0) ? Number(s.dailySalary) : (Number(s.monthlySalary||0) / (Number(s.workingDays)||settings.workingDays||26));
+    const recs = attendanceCache[id]||{};
+    Object.entries(recs).forEach(([dKey,rec])=>{
+      if(dKey.startsWith(mKey)){
+        if(rec.status==='Present'||rec.status==='Late') monthCost += perDay;
+        else if(rec.status==='HalfDay') monthCost += perDay/2;
+        else if(rec.status==='Leave' && settings.paidLeave) monthCost += perDay;
+        else if(rec.status==='HalfDayLeave' && settings.paidLeave) monthCost += perDay/2;
+      }
+    });
+  });
+  document.getElementById('stMonthCost').textContent = fmtMoney(monthCost);
+
+  let incTotal=0;
+  Object.values(incentiveCache).forEach(byId=>Object.values(byId||{}).forEach(inc=>{
+    if((inc.date||'').startsWith(mKey)) incTotal += Number(inc.amount||0);
+  }));
+  document.getElementById('stIncentives').textContent = fmtMoney(incTotal);
+
+  let advTotal=0;
+  Object.values(advanceCache).forEach(byId=>Object.values(byId||{}).forEach(a=>{
+    if(!a.settled) advTotal += Number(a.amount||0);
+  }));
+  document.getElementById('stAdvances').textContent = fmtMoney(advTotal);
+
+  const pendingLeaves = Object.values(leaveCache).filter(l=>l.status==='Pending').length;
+  document.getElementById('stLeaveReq').textContent = pendingLeaves;
+  const notifBadge = document.getElementById('notifBadge');
+  if(notifBadge) notifBadge.style.display = pendingLeaves>0 ? 'block' : 'none';
+
+  renderTrendChart(activeStaff);
+}
+
+function renderTrendChart(activeStaff){
+  const labels = [];
+  const data = [];
+  const now = new Date();
+  for(let i=5;i>=0;i--){
+    const d = new Date(now.getFullYear(), now.getMonth()-i, 1);
+    const mKey = d.toISOString().slice(0,7);
+    labels.push(d.toLocaleDateString(currentLang==='ta'?'ta-IN':'en-IN',{month:'short'}));
+    let cost=0;
+    activeStaff.forEach(([id,s])=>{
+      const perDay = (s.dailySalary && Number(s.dailySalary)>0) ? Number(s.dailySalary) : (Number(s.monthlySalary||0) / (Number(s.workingDays)||settings.workingDays||26));
+      const recs = attendanceCache[id]||{};
+      Object.entries(recs).forEach(([dKey,rec])=>{
+        if(dKey.startsWith(mKey)){
+          if(rec.status==='Present'||rec.status==='Late') cost += perDay;
+          else if(rec.status==='HalfDay') cost += perDay/2;
+          else if(rec.status==='Leave' && settings.paidLeave) cost += perDay;
+          else if(rec.status==='HalfDayLeave' && settings.paidLeave) cost += perDay/2;
+        }
+      });
+    });
+    data.push(Math.round(cost));
+  }
+  const ctx = document.getElementById('trendChart');
+  if(trendChartRef) trendChartRef.destroy();
+  trendChartRef = new Chart(ctx, {
+    type:'bar',
+    data:{ labels, datasets:[{ label:'₹', data, backgroundColor:'#4C5FA6', borderRadius:6 }] },
+    options:{
+      plugins:{legend:{display:false}},
+      scales:{ y:{ beginAtZero:true, ticks:{ callback:v=>'₹'+v } } }
+    }
+  });
+}
+
+/* =====================================================================
+   STAFF CRUD  (table: staff, storage bucket: staff-media)
+===================================================================== */
+function openStaffModal(staffId){
+  document.getElementById('staffModalTitle').textContent = staffId ? 'ஊழியர் திருத்து' : I18N[currentLang].addStaff;
+  document.getElementById('staffEditId').value = staffId || '';
+  if(staffId){
+    const s = staffCache[staffId];
+    document.getElementById('staffEmpId').value = s.empId || staffId;
+    document.getElementById('staffName').value = s.name || '';
+    document.getElementById('staffMobileF').value = s.mobile || '';
+    document.getElementById('staffPinF').value = s.pin || '';
+    document.getElementById('staffAddressF').value = s.address || '';
+    document.getElementById('staffAadhaarF').value = s.aadhaar || '';
+    document.getElementById('staffDojF').value = s.doj || '';
+    document.getElementById('staffDesigF').value = s.designation || '';
+    document.getElementById('staffMonthlySalF').value = s.monthlySalary || '';
+    document.getElementById('staffWorkingDaysF').value = s.workingDays || 26;
+    document.getElementById('staffShiftStartF').value = s.shiftStart || '09:30';
+    document.getElementById('staffShiftEndF').value = s.shiftEnd || '20:00';
+    document.getElementById('staffStatusF').value = s.status || 'Active';
+  } else {
+    ['staffName','staffMobileF','staffPinF','staffAddressF','staffAadhaarF','staffDojF','staffDesigF','staffMonthlySalF'].forEach(id=>document.getElementById(id).value='');
+    document.getElementById('staffWorkingDaysF').value = 26;
+    document.getElementById('staffShiftStartF').value = '09:30';
+    document.getElementById('staffShiftEndF').value = '20:00';
+    document.getElementById('staffStatusF').value = 'Active';
+    document.getElementById('staffEmpId').value = 'EMP' + (Object.keys(staffCache).length+1).toString().padStart(3,'0');
+  }
+  openModal('staffModal');
+}
+async function saveStaff(){
+  const editId = document.getElementById('staffEditId').value;
+  const name = document.getElementById('staffName').value.trim();
+  const mobile = document.getElementById('staffMobileF').value.trim();
+  const pin = document.getElementById('staffPinF').value.trim();
+  if(!name || mobile.length<10 || pin.length!==4){
+    toast('பெயர், 10-இலக்க மொபைல், 4-இலக்க PIN அவசியம்.'); return;
+  }
+  const workingDays = Number(document.getElementById('staffWorkingDaysF').value||26);
+  const monthlySalary = Number(document.getElementById('staffMonthlySalF').value||0);
+
+  const record = {
+    owner_id: currentUser.id,
+    emp_id: document.getElementById('staffEmpId').value,
+    name, mobile, pin,
+    address: document.getElementById('staffAddressF').value.trim(),
+    aadhaar: document.getElementById('staffAadhaarF').value.trim(),
+    doj: document.getElementById('staffDojF').value || null,
+    designation: document.getElementById('staffDesigF').value.trim(),
+    monthly_salary: monthlySalary,
+    daily_salary: monthlySalary / (workingDays||26),
+    working_days: workingDays,
+    shift_start: document.getElementById('staffShiftStartF').value,
+    shift_end: document.getElementById('staffShiftEndF').value,
+    status: document.getElementById('staffStatusF').value
+  };
+  if(editId) record.id = editId;
+
+  const photoFile = document.getElementById('staffPhotoF').files[0];
+  try{
+    if(photoFile){
+      const path = `${currentUser.id}/${editId || 'new-'+Date.now()}.jpg`;
+      const { error: upErr } = await sb.storage.from('staff-media').upload(path, photoFile, {upsert:true});
+      if(upErr) throw upErr;
+      const { data: pub } = sb.storage.from('staff-media').getPublicUrl(path);
+      record.photo_url = pub.publicUrl;
+    }
+    const { error } = await sb.from('staff').upsert(record).select();
+    if(error) throw error;
+    closeModal('staffModal');
+    toast('ஊழியர் விவரம் சேமிக்கப்பட்டது ✅');
+    loadStaff(currentUser.id);
+  }catch(e){
+    toast('பிழை: '+(e.message||e));
+  }
+}
+let currentStaffFilter = 'all';
+function setStaffFilter(f){
+  haptic();
+  currentStaffFilter = f;
+  document.querySelectorAll('#staffFilterChips .chip').forEach(c=>c.classList.toggle('active', c.dataset.filter===f));
+  renderStaffList();
+}
+function renderStaffList(){
+  const wrap = document.getElementById('staffListWrap');
+  const q = (document.getElementById('staffSearch').value||'').toLowerCase();
+  const all = Object.entries(staffCache);
+  const activeCount = all.filter(([id,s])=>s.status!=='Inactive').length;
+  const inactiveCount = all.length - activeCount;
+  document.getElementById('staffStatsRow').innerHTML = `
+    <div class="staff-mini-stat"><div class="v num">${all.length}</div><div class="l">மொத்தம்</div></div>
+    <div class="staff-mini-stat"><div class="v num" style="color:var(--success);">${activeCount}</div><div class="l">Active</div></div>
+    <div class="staff-mini-stat"><div class="v num" style="color:var(--muted);">${inactiveCount}</div><div class="l">Inactive</div></div>
+  `;
+
+  const entries = all.filter(([id,s])=>{
+    const matchesFilter = currentStaffFilter==='all' || (s.status||'Active')===currentStaffFilter;
+    const matchesSearch = !q || (s.name||'').toLowerCase().includes(q) || (s.mobile||'').includes(q);
+    return matchesFilter && matchesSearch;
+  });
+  if(entries.length===0){
+    wrap.innerHTML = `<div class="empty-state"><div class="ei"><span class="material-symbols-rounded">group_off</span></div><div>ஊழியர்கள் இல்லை. + பொத்தானை அழுத்தி சேர்க்கவும்.</div></div>`;
+    return;
+  }
+  wrap.innerHTML = entries.map(([id,s])=>`
+    <div class="staff-row-wrap" data-staff-id="${id}">
+      <div class="staff-row-swipe-bg" onclick="deleteStaff('${id}')"><span class="material-symbols-rounded">delete</span></div>
+      <div class="staff-row" onclick="openStaffDetail('${id}')">
+        <div class="avatar">${s.photoUrl?`<img src="${s.photoUrl}">`:(s.name||'?').charAt(0)}</div>
+        <div class="staff-info">
+          <div class="name">${s.name||''} <span class="badge ${s.status==='Inactive'?'inactive':'active'}">${s.status||'Active'}</span></div>
+          <div class="meta">${s.designation||''} • ${s.mobile||''} • ${fmtMoney(s.monthlySalary)}/மாதம்</div>
+        </div>
+        <div class="staff-actions">
+          <button class="mini-btn" onclick="event.stopPropagation(); openStaffModal('${id}')"><span class="material-symbols-rounded" style="font-size:17px;">edit</span></button>
+          <button class="mini-btn" onclick="event.stopPropagation(); deleteStaff('${id}')"><span class="material-symbols-rounded" style="font-size:17px;">delete</span></button>
+        </div>
+      </div>
+    </div>
+  `).join('');
+  attachSwipeToDelete();
+}
+function attachSwipeToDelete(){
+  document.querySelectorAll('.staff-row-wrap').forEach(wrapEl=>{
+    const row = wrapEl.querySelector('.staff-row');
+    const staffId = wrapEl.dataset.staffId;
+    let startX = 0, dx = 0, dragging = false;
+    row.addEventListener('touchstart', (e)=>{ startX = e.touches[0].clientX; dragging = true; row.style.transition='none'; }, {passive:true});
+    row.addEventListener('touchmove', (e)=>{
+      if(!dragging) return;
+      dx = e.touches[0].clientX - startX;
+      if(dx < 0) row.style.transform = `translateX(${Math.max(dx,-88)}px)`;
+    }, {passive:true});
+    row.addEventListener('touchend', ()=>{
+      dragging = false;
+      row.style.transition = 'transform .2s ease';
+      if(dx < -60){ haptic(15); row.style.transform = 'translateX(-88px)'; }
+      else{ row.style.transform = 'translateX(0)'; }
+      dx = 0;
+    });
+  });
+}
+async function deleteStaff(id){
+  if(!confirm('இந்த ஊழியரை நீக்க வேண்டுமா?')) return;
+  const { error } = await sb.from('staff').delete().eq('id', id);
+  if(error){ toast(error.message); return; }
+  toast('நீக்கப்பட்டது');
+  loadStaff(currentUser.id);
+}
+
+/* =====================================================================
+   STAFF DETAIL — "Attendance Story Strip" (day-by-day, selfie + status ring)
+===================================================================== */
+let currentStaffDetailId = null;
+let currentStaffDetailDate = null;
+function openStaffDetail(staffId){
+  const s = staffCache[staffId];
+  if(!s) return;
+  currentStaffDetailId = staffId;
+  currentStaffDetailDate = null;
+  document.getElementById('sdName').textContent = s.name || '';
+  document.getElementById('sdDesig').textContent = s.designation || '';
+  document.getElementById('sdMobile').textContent = s.mobile || '';
+  document.getElementById('sdAvatar').innerHTML = s.photoUrl ? `<img src="${s.photoUrl}">` : (s.name||'?').charAt(0);
+  document.getElementById('sdMonth').value = new Date().toISOString().slice(0,7);
+  document.getElementById('sdDayDetail').style.display = 'none';
+  openModal('staffDetailModal');
+  renderStaffDetail();
+}
+function renderStaffDetail(){
+  const staffId = currentStaffDetailId;
+  if(!staffId) return;
+  const monthKey = document.getElementById('sdMonth').value;
+  const recs = attendanceCache[staffId] || {};
+  const [y,m] = monthKey.split('-').map(Number);
+  const daysInMonth = new Date(y, m, 0).getDate();
+  const todayStr = todayKey();
+
+  let present=0, late=0, absent=0, half=0, marked=0, earlyDays=0, totalEarlyMin=0, totalOvertimeHrs=0, leaveDays=0;
+  let html = '';
+  for(let d=1; d<=daysInMonth; d++){
+    const dateStr = `${monthKey}-${String(d).padStart(2,'0')}`;
+    if(dateStr > todayStr) break; // எதிர்கால நாட்களை காட்ட வேண்டாம்
+    const rec = recs[dateStr];
+    let ringClass = 'ring-none';
+    if(rec && rec.status){
+      marked++;
+      if(rec.status==='Present'){ ringClass='ring-present'; present++; }
+      else if(rec.status==='Late'){ ringClass='ring-late'; present++; late++; }
+      else if(rec.status==='HalfDay'){ ringClass='ring-halfday'; half++; }
+      else if(rec.status==='Absent'){ ringClass='ring-absent'; absent++; }
+      else if(rec.status==='Leave'||rec.status==='HalfDayLeave'){ ringClass='ring-leave'; leaveDays++; }
+      if(rec.earlyMinutes>0){ earlyDays++; totalEarlyMin += rec.earlyMinutes; }
+      totalOvertimeHrs += Number(rec.overtime||0);
+    } else if(new Date(dateStr+'T00:00:00').getDay() !== 0){
+      // Record-ஏ இல்லாத Sunday-அல்லாத கடந்த நாள் = Mark ஆகாத Absence
+      ringClass = 'ring-absent'; absent++; marked++;
+    }
+    const inner = (rec && rec.selfieUrl) ? `<img src="${rec.selfieUrl}">` : `<span class="ph">${d}</span>`;
+    const suspectCls = (rec && rec.selfieViaGallery) ? ' suspect' : '';
+    html += `<div class="day-chip" onclick="selectStaffDetailDay('${dateStr}')">
+      <div class="ring ${ringClass}${suspectCls}"><div class="ring-inner">${inner}</div></div>
+      <div class="dnum">${d}</div>
+    </div>`;
+  }
+  document.getElementById('sdDayStrip').innerHTML = html || `<div class="empty-state" style="padding:10px;"><div>பதிவுகள் இல்லை</div></div>`;
+  document.getElementById('sdPresent').textContent = present;
+  document.getElementById('sdLate').textContent = late;
+  document.getElementById('sdHalfDay').textContent = half;
+  document.getElementById('sdAbsent').textContent = absent;
+  const pct = marked>0 ? Math.round(((present+half*0.5)/marked)*100) : 0;
+  document.getElementById('sdPct').textContent = pct+'%';
+  document.getElementById('sdDayDetail').style.display = 'none';
+
+  const punctWrap = document.getElementById('sdPunctualityWrap');
+  if(earlyDays>0 || totalOvertimeHrs>0){
+    punctWrap.style.display = 'block';
+    punctWrap.innerHTML = `
+      <div style="font-weight:700; font-size:13px; margin-bottom:8px;">🌟 Punctuality & Overtime — Bonus முடிவெடுக்க உதவும்</div>
+      ${earlyDays>0 ? `<div style="font-size:12.5px; margin-bottom:4px;">🌅 சீக்கிரம் வந்த நாட்கள்: <b>${earlyDays}</b> (மொத்தம் ${totalEarlyMin} நிமிடங்கள் முன்னதாக)</div>` : ''}
+      ${totalOvertimeHrs>0 ? `<div style="font-size:12.5px; margin-bottom:8px;">⏱️ மொத்த Overtime: <b>${totalOvertimeHrs.toFixed(1)} மணி நேரம்</b></div>` : ''}
+      <button class="btn-outline" style="margin-top:2px;" onclick="closeModal('staffDetailModal'); goPage('salary'); document.getElementById('salStaffSelect').value='${staffId}'; computeSalaryUI();"><span class="material-symbols-rounded">redeem</span> இதை பார்த்து Bonus கொடு</button>
+    `;
+  } else {
+    punctWrap.style.display = 'none';
+  }
+
+  // Selfie strip-ஐ இன்றைய நாள்-க்கு auto-scroll பண்ணுவோம்
+  setTimeout(()=>{
+    const strip = document.getElementById('sdDayStrip');
+    if(strip.lastElementChild) strip.scrollLeft = strip.scrollWidth;
+  }, 50);
+}
+async function selectStaffDetailDay(dateStr){
+  const staffId = currentStaffDetailId;
+  currentStaffDetailDate = dateStr;
+  const rec = (attendanceCache[staffId]||{})[dateStr];
+  const wrap = document.getElementById('sdDayDetail');
+  wrap.style.display = 'block';
+  if(!rec || !rec.status){
+    wrap.innerHTML = `<div class="empty-state" style="padding:14px;">
+      <div class="ei"><span class="material-symbols-rounded">mail</span></div><div>${dateStr} — பதிவு இல்லை (Absent)</div>
+      <button class="btn-outline" style="margin-top:10px;" onclick="haptic(); openAttEditModal()"><span class="material-symbols-rounded">edit</span> இந்த நாளை திருத்து / Mark செய்</button>
+    </div>`;
+    return;
+  }
+  const gpsLink = rec.gps ? `<a href="https://maps.google.com/?q=${rec.gps.lat},${rec.gps.lng}" target="_blank" style="color:var(--areca-500); font-weight:700; font-size:12.5px; text-decoration:none;">📍 GPS Location பார்க்க</a>` : `<span style="font-size:11.5px; color:var(--muted);">📍 GPS பதிவு இல்லை</span>`;
+  const galleryWarn = rec.selfieViaGallery ? `<div class="gallery-warn"><span class="material-symbols-rounded">warning</span>Live Camera இல்ல — Gallery Photo</div>` : '';
+
+  const { data: breakRows } = await sb.from('breaks').select('*').eq('staff_id', staffId).eq('date', dateStr).order('created_at');
+  let breaksHtml = '';
+  if(breakRows && breakRows.length>0){
+    breaksHtml = `<div style="margin-top:12px; padding-top:12px; border-top:1px dashed var(--line);">
+      <div style="font-weight:700; font-size:12.5px; margin-bottom:6px; display:flex; align-items:center; gap:5px;"><span class="material-symbols-rounded" style="font-size:16px;">directions_walk</span>வெளியே போன நேரங்கள் (${breakRows.length})</div>
+      ${breakRows.map(b=>`<div style="font-size:12px; color:var(--muted); margin-bottom:3px;">${b.out_time} → ${b.in_time || 'இன்னும் வெளியே'}</div>`).join('')}
+    </div>`;
+  }
+
+  wrap.innerHTML = `
+    <div style="display:flex; gap:14px; align-items:flex-start;">
+      ${rec.selfieUrl ? `<img src="${rec.selfieUrl}" style="width:66px;height:66px;border-radius:14px;object-fit:cover; border:2px solid ${rec.selfieViaGallery?'var(--vermilion)':'var(--areca-500)'};">` : `<div class="avatar" style="width:66px;height:66px;"><span class="material-symbols-rounded">person</span></div>`}
+      <div style="flex:1; min-width:0;">
+        <div style="font-weight:700; font-size:14px;">${dateStr}</div>
+        <div style="font-size:12.5px; color:var(--muted); margin:5px 0;">
+          ${rec.checkIn||'--'} → ${rec.checkOut||'--'} &nbsp; <span class="status-pill status-${rec.status}">${rec.status}</span>
+        </div>
+        ${rec.lateMinutes ? `<div style="font-size:12px; color:var(--vermilion); margin-bottom:3px;">⏰ தாமதம்: ${rec.lateMinutes} நிமிடங்கள்</div>` : ''}
+        ${rec.earlyMinutes ? `<div style="font-size:12px; color:var(--areca-600); margin-bottom:3px;">🌅 சீக்கிரம்: ${rec.earlyMinutes} நிமிடங்கள் முன்னதாக</div>` : ''}
+        ${rec.workingHours ? `<div style="font-size:12px; color:var(--muted); margin-bottom:5px;">⏱️ வேலை நேரம்: ${rec.workingHours}h</div>` : ''}
+        ${gpsLink}
+        ${galleryWarn}
+      </div>
+    </div>
+    ${breaksHtml}
+    <button class="btn-outline" style="margin-top:12px;" onclick="haptic(); openAttEditModal()"><span class="material-symbols-rounded">edit</span> இந்த பதிவை திருத்து</button>
+  `;
+}
+
+/* =====================================================================
+   OWNER: ATTENDANCE EDIT / CORRECTION
+===================================================================== */
+function openAttEditModal(){
+  const staffId = currentStaffDetailId;
+  const dateStr = currentStaffDetailDate;
+  if(!staffId || !dateStr) return;
+  const rec = (attendanceCache[staffId]||{})[dateStr];
+  document.getElementById('aeStaffId').value = staffId;
+  document.getElementById('aeDate').value = dateStr;
+  document.getElementById('aeDateDisplay').value = dateStr;
+  document.getElementById('aeStatus').value = (rec && rec.status) || 'Absent';
+  document.getElementById('aeCheckIn').value = (rec && rec.checkIn) || '';
+  document.getElementById('aeCheckOut').value = (rec && rec.checkOut) || '';
+  document.getElementById('aeWorkingHours').value = (rec && rec.workingHours) || '';
+  openModal('attEditModal');
+}
+async function saveAttendanceEdit(){
+  const staffId = document.getElementById('aeStaffId').value;
+  const dateStr = document.getElementById('aeDate').value;
+  const status = document.getElementById('aeStatus').value;
+  const checkIn = document.getElementById('aeCheckIn').value || null;
+  const checkOut = document.getElementById('aeCheckOut').value || null;
+  const workingHours = Number(document.getElementById('aeWorkingHours').value || 0);
+  const existing = (attendanceCache[staffId]||{})[dateStr];
+  const row = {
+    owner_id: currentUser.id, staff_id: staffId, date: dateStr,
+    check_in: checkIn, check_out: checkOut, status, working_hours: workingHours,
+    late_minutes: existing ? (existing.lateMinutes||0) : 0,
+    selfie_url: existing ? (existing.selfieUrl||null) : null,
+    gps_lat: existing && existing.gps ? existing.gps.lat : null,
+    gps_lng: existing && existing.gps ? existing.gps.lng : null,
+    device: existing ? existing.device : 'owner-manual-edit'
+  };
+  const { error } = await sb.from('attendance').upsert(row, {onConflict:'staff_id,date'});
+  if(error){ toast(error.message); return; }
+  toast('வருகை Update ஆனது ✅');
+  closeModal('attEditModal');
+  await loadAttendance(currentUser.id);
+  renderStaffDetail();
+  selectStaffDetailDay(dateStr);
+}
+async function deleteAttendanceRecord(){
+  const staffId = document.getElementById('aeStaffId').value;
+  const dateStr = document.getElementById('aeDate').value;
+  if(!confirm('இந்த வருகை பதிவை நீக்க வேண்டுமா?')) return;
+  const { error } = await sb.from('attendance').delete().eq('staff_id', staffId).eq('date', dateStr);
+  if(error){ toast(error.message); return; }
+  toast('பதிவு நீக்கப்பட்டது');
+  closeModal('attEditModal');
+  await loadAttendance(currentUser.id);
+  renderStaffDetail();
+  document.getElementById('sdDayDetail').style.display = 'none';
+}
+
+/* =====================================================================
+   OWNER: BULK FILL ATTENDANCE (App பயன்படுத்த ஆரம்பிக்கும் முன் இருந்த
+   நாட்களை ஒரே தடவையில் Present/Absent/etc. ஆக நிரப்ப)
+===================================================================== */
+function toggleBfLateField(){
+  const isLate = document.getElementById('bfStatus').value === 'Late';
+  document.getElementById('bfLateMinField').style.display = isLate ? 'block' : 'none';
+}
+async function bulkFillAttendance(){
+  const staffId = currentStaffDetailId;
+  if(!staffId){ toast('ஊழியரை தேர்வு செய்யவும்'); return; }
+  const from = document.getElementById('bfFrom').value;
+  const to = document.getElementById('bfTo').value;
+  const status = document.getElementById('bfStatus').value;
+  const skipSunday = document.getElementById('bfSkipSunday').checked;
+  const lateMin = status==='Late' ? Number(document.getElementById('bfLateMinutes').value || 15) : 0;
+  const todayStr = todayKey();
+  if(!from || !to){ toast('தொடக்க & முடிவு தேதி தேர்வு செய்யவும்'); return; }
+  if(from > to){ toast('தொடக்க தேதி, முடிவு தேதிக்கு முன் இருக்கணும்'); return; }
+  if(to > todayStr){ toast('எதிர்கால தேதிகளுக்கு நிரப்ப முடியாது'); return; }
+
+  const s = staffCache[staffId];
+  const shiftStart = (s && s.shiftStart) || settings.shiftStart || '09:30';
+  const hasCheckIn = (status==='Present'||status==='Late'||status==='HalfDay');
+
+  const rows = [];
+  let d = new Date(from+'T00:00:00');
+  const end = new Date(to+'T00:00:00');
+  while(d <= end){
+    const dow = d.getDay(); // 0 = ஞாயிறு
+    if(!(skipSunday && dow===0)){
+      const dateStr = d.toISOString().slice(0,10);
+      rows.push({
+        owner_id: currentUser.id, staff_id: staffId, date: dateStr,
+        check_in: hasCheckIn ? shiftStart : null,
+        check_out: null, status,
+        working_hours: (status==='Present'||status==='Late') ? 9 : (status==='HalfDay' ? 4 : 0),
+        late_minutes: lateMin, device: 'owner-bulk-fill'
+      });
+    }
+    d.setDate(d.getDate()+1);
+  }
+  if(rows.length===0){ toast('இந்த வரம்பில் நிரப்ப நாட்கள் இல்ல'); return; }
+  if(!confirm(`${rows.length} நாட்களுக்கு "${status}" ஆக நிரப்பப்படும். தொடரவா?\n(ஏற்கனவே பதிவு இருக்கிற நாட்கள் Overwrite ஆகும்)`)) return;
+
+  toast('நிரப்பப்படுகிறது...');
+  const { error } = await sb.from('attendance').upsert(rows, {onConflict:'staff_id,date'});
+  if(error){ toast(error.message); return; }
+  toast(`${rows.length} நாட்கள் நிரப்பப்பட்டன ✅`);
+  await loadAttendance(currentUser.id);
+  renderStaffDetail();
+}
+function populateStaffSelects(){
+  const opts = Object.entries(staffCache).filter(([id,s])=>s.status!=='Inactive')
+    .map(([id,s])=>`<option value="${id}">${s.name} (${s.empId||id.slice(-4)})</option>`).join('');
+  const empty = `<option value="">-- ஊழியரை தேர்வு செய் --</option>`;
+  document.getElementById('attStaffSelect').innerHTML = empty+opts;
+  document.getElementById('salStaffSelect').innerHTML = empty+opts;
+}
+
+/* =====================================================================
+   ATTENDANCE  (table: attendance, unique on staff_id+date -> upsert)
+===================================================================== */
+function refreshAttendanceHero(){
+  const staffId = document.getElementById('attStaffSelect').value;
+  const dial = document.getElementById('attDial');
+  const hoursTxt = document.getElementById('attHoursTxt');
+  const statusLine = document.getElementById('attStatusLine');
+  const btnIn = document.getElementById('btnCheckIn');
+  const btnOut = document.getElementById('btnCheckOut');
+  if(!staffId){
+    dial.style.setProperty('--pct',0); hoursTxt.textContent='0.0h'; statusLine.textContent='ஊழியரை தேர்வு செய்யவும்';
+    btnIn.disabled=true; btnOut.disabled=true; return;
+  }
+  const rec = ((attendanceCache[staffId]||{})[todayKey()]) || null;
+  if(!rec){
+    dial.style.setProperty('--pct',0); hoursTxt.textContent='0.0h';
+    statusLine.textContent = 'இன்னும் Check In செய்யவில்லை';
+    btnIn.disabled=false; btnOut.disabled=true;
+  } else if(rec.checkIn && !rec.checkOut){
+    const mins = minutesBetween(rec.checkIn, fmtTime(new Date()));
+    const hrs = Math.max(0, mins/60);
+    dial.style.setProperty('--pct', Math.min(100, (hrs/9)*100));
+    hoursTxt.textContent = hrs.toFixed(1)+'h';
+    statusLine.textContent = `Check In: ${rec.checkIn} • ${rec.status}`;
+    btnIn.disabled=true; btnOut.disabled=false;
+  } else {
+    const hrs = (rec.workingHours||0);
+    dial.style.setProperty('--pct', Math.min(100,(hrs/9)*100));
+    hoursTxt.textContent = hrs.toFixed(1)+'h';
+    statusLine.textContent = `${rec.checkIn} → ${rec.checkOut} • ${rec.status}`;
+    btnIn.disabled=true; btnOut.disabled=true;
+  }
+}
+async function markCheckIn(){
+  const staffId = document.getElementById('attStaffSelect').value;
+  if(!staffId){ toast('ஊழியரை தேர்வு செய்யவும்'); return; }
+  const s = staffCache[staffId];
+  const now = new Date();
+  const time = fmtTime(now);
+  const shiftStart = s.shiftStart||settings.shiftStart||'09:30';
+  const lateMinutes = Math.max(0, minutesBetween(shiftStart, time) - (Number(settings.lateGrace)||15));
+  const earlyMinutes = Math.max(0, minutesBetween(time, shiftStart));
+  const status = lateMinutes>0 ? 'Late' : 'Present';
+
+  const doInsert = (gps)=>{
+    const row = {
+      owner_id: currentUser.id, staff_id: staffId, date: todayKey(),
+      check_in: time, check_out: null, status, late_minutes: lateMinutes, early_minutes: earlyMinutes,
+      device: navigator.userAgent.slice(0,60), working_hours: 0,
+      gps_lat: gps ? gps.lat : null, gps_lng: gps ? gps.lng : null
+    };
+    sb.from('attendance').upsert(row, {onConflict:'staff_id,date'}).then(({error})=>{
+      if(error){ toast(error.message); return; }
+      toast('Check In ✅ '+time);
+      loadAttendance(currentUser.id);
+    });
+  };
+  if(navigator.geolocation){
+    navigator.geolocation.getCurrentPosition(
+      pos=>doInsert({lat:pos.coords.latitude, lng:pos.coords.longitude}),
+      ()=>doInsert(null), {timeout:4000}
+    );
+  } else doInsert(null);
+}
+async function markCheckOut(){
+  const staffId = document.getElementById('attStaffSelect').value;
+  if(!staffId){ toast('ஊழியரை தேர்வு செய்யவும்'); return; }
+  const rec = (attendanceCache[staffId]||{})[todayKey()];
+  if(!rec || !rec.checkIn){ toast('முதலில் Check In செய்யவும்'); return; }
+  const now = new Date();
+  const time = fmtTime(now);
+  const mins = minutesBetween(rec.checkIn, time);
+  const hrs = Math.max(0, mins/60);
+  let status = rec.status;
+  if(hrs < 4) status = 'HalfDay';
+  const overtime = Math.max(0, hrs-9);
+  const { error } = await sb.from('attendance')
+    .update({ check_out:time, working_hours:Number(hrs.toFixed(2)), overtime:Number(overtime.toFixed(2)), status })
+    .eq('staff_id', staffId).eq('date', todayKey());
+  if(error){ toast(error.message); return; }
+  toast('Check Out ✅ '+time);
+  loadAttendance(currentUser.id);
+}
+function renderAttendanceHistory(){
+  const staffId = document.getElementById('attStaffSelect').value;
+  const wrap = document.getElementById('attHistoryWrap');
+  if(!staffId){ wrap.innerHTML = ''; return; }
+  const recs = attendanceCache[staffId] || {};
+  const days = Object.keys(recs).sort().reverse().slice(0,7);
+  if(days.length===0){ wrap.innerHTML = `<div class="empty-state"><div class="ei"><span class="material-symbols-rounded">calendar_month</span></div><div>பதிவுகள் இல்லை</div></div>`; return; }
+  wrap.innerHTML = days.map(d=>{
+    const r = recs[d];
+    return `<div class="att-list-item">
+      <div><div style="font-weight:600; font-size:13px;">${d}</div><div style="font-size:11.5px; color:var(--muted);">${r.checkIn||'--'} → ${r.checkOut||'--'}</div></div>
+      <span class="status-pill status-${r.status}">${r.status}</span>
+    </div>`;
+  }).join('');
+}
+
+/* =====================================================================
+   SALARY CALCULATION
+===================================================================== */
+function computeSalary(staffId, monthKey){
+  const s = staffCache[staffId];
+  if(!s) return null;
+  const workingDays = Number(s.workingDays)||Number(settings.workingDays)||26;
+  const perDay = Number(s.monthlySalary||0) / workingDays;
+
+  const recs = attendanceCache[staffId] || {};
+  let present=0, halfDay=0, absentDays=0, lateDays=0, overtimeHrs=0, totalLateMin=0, leaveDays=0, halfDayLeaveDays=0;
+  Object.entries(recs).forEach(([dKey,r])=>{
+    if(!dKey.startsWith(monthKey)) return;
+    if(r.status==='Present'){ present++; }
+    else if(r.status==='Late'){ present++; lateDays++; totalLateMin += (r.lateMinutes||0); }
+    else if(r.status==='HalfDay'){ halfDay++; }
+    else if(r.status==='Absent'){ absentDays++; }
+    else if(r.status==='Leave'){ leaveDays++; }
+    else if(r.status==='HalfDayLeave'){ halfDayLeaveDays++; }
+    overtimeHrs += Number(r.overtime||0);
+  });
+
+  const leavePay = settings.paidLeave ? perDay * (leaveDays + halfDayLeaveDays*0.5) : 0;
+  const earned = perDay * (present + halfDay*0.5) + leavePay;
+  const overtimePay = overtimeHrs * (perDay/9) * 1.5;
+  const lateDeduction = lateDays * Number(settings.lateDeduction||50);
+
+  let incTotal=0;
+  Object.values((incentiveCache[staffId]||{})).forEach(inc=>{
+    if((inc.date||'').startsWith(monthKey)) incTotal += Number(inc.amount||0);
+  });
+
+  let advTotal=0;
+  Object.values((advanceCache[staffId]||{})).forEach(a=>{
+    if(!a.settled && (a.date||'').startsWith(monthKey)) advTotal += Number(a.amount||0);
+  });
+
+  const grossBeforeStat = earned + overtimePay + incTotal - lateDeduction;
+  const pf = settings.pfEnabled ? grossBeforeStat*0.12 : 0;
+  const esi = settings.esiEnabled ? grossBeforeStat*0.0075 : 0;
+  const net = grossBeforeStat - pf - esi - advTotal;
+
+  return {
+    staff:s, workingDays, perDay, present, halfDay, absentDays, lateDays, totalLateMin,
+    leaveDays, halfDayLeaveDays,
+    overtimeHrs, earned, overtimePay, lateDeduction, incTotal, advTotal, pf, esi,
+    net: Math.max(0, net)
+  };
+}
+function computeSalaryUI(){
+  const staffId = document.getElementById('salStaffSelect').value;
+  const monthKey = document.getElementById('salMonth').value;
+  const wrap = document.getElementById('salaryBreakdownWrap');
+  if(!staffId || !monthKey){ wrap.innerHTML = `<div class="empty-state"><div class="ei"><span class="material-symbols-rounded">payments</span></div><div>ஊழியர் & மாதத்தை தேர்வு செய்யவும்</div></div>`; return; }
+  const r = computeSalary(staffId, monthKey);
+  if(!r){ wrap.innerHTML=''; return; }
+  wrap.innerHTML = `
+    <div class="breakdown-row"><span>வேலை நாட்கள் (Present+Half)</span><span class="num">${r.present} + ${r.halfDay}(½)</span></div>
+    ${(r.leaveDays>0 || r.halfDayLeaveDays>0) ? `<div class="breakdown-row"><span>Approved Leave (${settings.paidLeave?'Paid':'Unpaid'})</span><span class="num">${r.leaveDays} + ${r.halfDayLeaveDays}(½)</span></div>` : ''}
+    <div class="breakdown-row"><span>நாள் சம்பளம்</span><span class="num">${fmtMoney(r.perDay)}</span></div>
+    <div class="breakdown-row"><span>சம்பாதித்தது</span><span class="num plus">+${fmtMoney(r.earned)}</span></div>
+    <div class="breakdown-row"><span>Overtime (${r.overtimeHrs.toFixed(1)}h)</span><span class="num plus">+${fmtMoney(r.overtimePay)}</span></div>
+    <div class="breakdown-row"><span>ஊக்கத்தொகை/Bonus</span><span class="num plus">+${fmtMoney(r.incTotal)}</span></div>
+    <div class="breakdown-row"><span>தாமத கழிவு (${r.lateDays} நாள்)</span><span class="num minus">-${fmtMoney(r.lateDeduction)}</span></div>
+    ${settings.pfEnabled?`<div class="breakdown-row"><span>PF (12%)</span><span class="num minus">-${fmtMoney(r.pf)}</span></div>`:''}
+    ${settings.esiEnabled?`<div class="breakdown-row"><span>ESI (0.75%)</span><span class="num minus">-${fmtMoney(r.esi)}</span></div>`:''}
+    <div class="breakdown-row"><span>முன்பணம் கழிவு</span><span class="num minus">-${fmtMoney(r.advTotal)}</span></div>
+    <div class="breakdown-row total"><span>நிகர சம்பளம்</span><span class="num">${fmtMoney(r.net)}</span></div>
+  `;
+}
+async function addAdvance(){
+  const staffId = document.getElementById('salStaffSelect').value;
+  const amt = Number(document.getElementById('salAdvanceAdd').value||0);
+  if(!staffId || amt<=0){ toast('ஊழியர் மற்றும் தொகை உள்ளிடவும்'); return; }
+  const { error } = await sb.from('advances').insert({
+    owner_id: currentUser.id, staff_id: staffId, amount: amt, date: todayKey(), reason:'Advance', settled:false
+  });
+  if(error){ toast(error.message); return; }
+  document.getElementById('salAdvanceAdd').value='';
+  toast('முன்பணம் சேர்க்கப்பட்டது');
+  loadAdvances(currentUser.id);
+}
+async function addIncentive(){
+  const staffId = document.getElementById('salStaffSelect').value;
+  const amt = Number(document.getElementById('salIncentiveAdd').value||0);
+  const reason = document.getElementById('salIncentiveReason').value.trim()||'Incentive';
+  if(!staffId || amt<=0){ toast('ஊழியர் மற்றும் தொகை உள்ளிடவும்'); return; }
+  const { error } = await sb.from('incentives').insert({
+    owner_id: currentUser.id, staff_id: staffId, amount: amt, date: todayKey(), type: reason
+  });
+  if(error){ toast(error.message); return; }
+  document.getElementById('salIncentiveAdd').value='';
+  document.getElementById('salIncentiveReason').value='';
+  toast('ஊக்கத்தொகை சேர்க்கப்பட்டது');
+  loadIncentives(currentUser.id);
+}
+
+/* =====================================================================
+   TAMIL FONT FOR PDF (jsPDF-க்கு default-ஆ Tamil support இல்ல, அதனால்
+   Hind Madurai (Latin+Tamil) font-ஐ fetch பண்ணி PDF-க்குள் embed பண்றோம்)
+===================================================================== */
+let tamilFontBase64 = null;
+function arrayBufferToBase64(buffer){
+  let binary = '';
+  const bytes = new Uint8Array(buffer);
+  const chunkSize = 0x8000;
+  for(let i=0;i<bytes.length;i+=chunkSize){
+    binary += String.fromCharCode.apply(null, bytes.subarray(i, i+chunkSize));
+  }
+  return btoa(binary);
+}
+async function ensureTamilFont(doc){
+  try{
+    if(!tamilFontBase64){
+      const res = await fetch('https://cdn.jsdelivr.net/gh/google/fonts@main/ofl/hindmadurai/HindMadurai-Regular.ttf');
+      if(!res.ok) throw new Error('font fetch failed');
+      const buf = await res.arrayBuffer();
+      tamilFontBase64 = arrayBufferToBase64(buf);
+    }
+    doc.addFileToVFS('HindMadurai-Regular.ttf', tamilFontBase64);
+    doc.addFont('HindMadurai-Regular.ttf', 'HindMadurai', 'normal');
+    doc.setFont('HindMadurai');
+  }catch(e){
+    console.warn('Tamil font load failed — PDF-ல் Tamil எழுத்துகள் சரியா வராம போகலாம்:', e);
+  }
+}
+// App திறந்தவுடனே Font-ஐ Background-ல் Load பண்ணி Cache பண்றோம் — இல்லைன்னா
+// "WhatsApp Share" பொத்தானை அழுத்தும்போது Font Fetch பண்ண நேரம் ஆகி,
+// Browser-ஓட Share Permission (user gesture) Expire ஆகி Share Silent-ஆ
+// Fail ஆகும். முன்னமேயே Cache பண்ணா, Click பண்ணதும் உடனே Share ஆகும்.
+function warmTamilFont(){
+  if(tamilFontBase64) return;
+  fetch('https://cdn.jsdelivr.net/gh/google/fonts@main/ofl/hindmadurai/HindMadurai-Regular.ttf')
+    .then(res=> res.ok ? res.arrayBuffer() : Promise.reject())
+    .then(buf=> { tamilFontBase64 = arrayBufferToBase64(buf); })
+    .catch(()=>{});
+}
+
+/* =====================================================================
+   SALARY SLIP PDF (jsPDF) + QR verification
+===================================================================== */
+async function buildSalarySlipDoc(){
+  const staffId = document.getElementById('salStaffSelect').value;
+  const monthKey = document.getElementById('salMonth').value;
+  if(!staffId || !monthKey){ toast('ஊழியர் & மாதத்தை தேர்வு செய்யவும்'); return null; }
+  const r = computeSalary(staffId, monthKey);
+  if(!r){ toast('சம்பள கணக்கீடு தோல்வி'); return null; }
+
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF({unit:'pt', format:'a4'});
+  const pageW = doc.internal.pageSize.getWidth();
+  await ensureTamilFont(doc);
+
+  doc.setFillColor(43,58,103);
+  doc.rect(0,0,pageW,90,'F');
+  doc.setTextColor(255,255,255);
+  doc.setFontSize(18);
+  doc.text(settings.shopName || 'Shop', 40, 40);
+  doc.setFontSize(10);
+  doc.text(settings.shopAddress || '', 40, 58);
+  doc.text((settings.phone?('Ph: '+settings.phone+'  '):'') + (settings.gst?('GST: '+settings.gst):''), 40, 72);
+  doc.setFontSize(14);
+  doc.text('SALARY SLIP', pageW-140, 45);
+  doc.setFontSize(9);
+  doc.text(monthKey, pageW-140, 60);
+
+  doc.setTextColor(30,30,30);
+  let y = 120;
+  doc.setFontSize(12);
+  doc.text('Employee Details', 40, y); y+=18;
+  doc.setFontSize(10);
+  const details = [
+    ['Employee ID', r.staff.empId||staffId],
+    ['Name', r.staff.name||''],
+    ['Designation', r.staff.designation||''],
+    ['Mobile', r.staff.mobile||''],
+    ['Date of Joining', r.staff.doj||'']
+  ];
+  details.forEach(([k,v])=>{ doc.text(`${k}:`, 40, y); doc.text(String(v), 180, y); y+=16; });
+
+  y+=10;
+  doc.setFontSize(12); doc.text('Attendance Summary', 40, y); y+=18;
+  doc.setFontSize(10);
+  const att = [
+    ['Working Days (base)', r.workingDays],
+    ['Present', r.present],
+    ['Half Day', r.halfDay],
+    ['Absent', r.absentDays],
+    ['Late Days', r.lateDays],
+    ['Overtime Hours', r.overtimeHrs.toFixed(1)]
+  ];
+  att.forEach(([k,v])=>{ doc.text(`${k}:`, 40, y); doc.text(String(v), 220, y); y+=16; });
+
+  y+=10;
+  doc.setFontSize(12); doc.text('Salary Breakdown', 40, y); y+=18;
+  doc.setFontSize(10);
+  const rows = [
+    ['Per Day Salary', fmtMoney(r.perDay)],
+    ['Earned (Present+Half)', '+'+fmtMoney(r.earned)],
+    ['Overtime Pay', '+'+fmtMoney(r.overtimePay)],
+    ['Incentive / Bonus', '+'+fmtMoney(r.incTotal)],
+    ['Late Deduction', '-'+fmtMoney(r.lateDeduction)],
+  ];
+  if(settings.pfEnabled) rows.push(['PF (12%)', '-'+fmtMoney(r.pf)]);
+  if(settings.esiEnabled) rows.push(['ESI (0.75%)', '-'+fmtMoney(r.esi)]);
+  rows.push(['Advance Deducted', '-'+fmtMoney(r.advTotal)]);
+  rows.forEach(([k,v])=>{ doc.text(k, 40, y); doc.text(String(v), 220, y); y+=16; });
+
+  y+=8;
+  doc.setDrawColor(200,200,200); doc.line(40,y,pageW-40,y); y+=22;
+  doc.setFontSize(14); doc.setTextColor(76,95,166);
+  doc.text('NET SALARY:', 40, y);
+  doc.text(fmtMoney(r.net), 220, y);
+  doc.setTextColor(30,30,30);
+
+  y+=50;
+  doc.setFontSize(9); doc.setTextColor(120,120,120);
+  doc.text('Owner Signature: ____________________', 40, y);
+  doc.text('Generated by Staff Manager App', 40, y+16);
+
+  // QR code is a nice-to-have; if it fails for any reason (CDN blocked, slow
+  // network, etc.) we must NOT let it stop the PDF from downloading.
+  try{
+    const qrDiv = document.createElement('div');
+    qrDiv.style.position='fixed'; qrDiv.style.left='-9999px';
+    document.body.appendChild(qrDiv);
+    const verifyText = `EMP:${r.staff.empId||staffId}|MONTH:${monthKey}|NET:${Math.round(r.net)}|SHOP:${settings.shopName}`;
+    if(typeof QRCode !== 'undefined'){
+      new QRCode(qrDiv, {text: verifyText, width:90, height:90});
+      await new Promise(res=>setTimeout(res,300));
+      const qrImg = qrDiv.querySelector('img') || qrDiv.querySelector('canvas');
+      if(qrImg){
+        const qrData = qrImg.tagName==='CANVAS' ? qrImg.toDataURL('image/png') : qrImg.src;
+        if(qrData && qrData.startsWith('data:')) doc.addImage(qrData, 'PNG', pageW-130, y-40, 80, 80);
+      }
+    }
+    document.body.removeChild(qrDiv);
+  }catch(qrErr){
+    console.warn('QR generation skipped:', qrErr);
+  }
+
+  const fname = `SalarySlip_${(r.staff.name||'staff').replace(/\s+/g,'_')}_${monthKey}.pdf`;
+  return { doc, r, monthKey, fname };
+}
+
+async function generateSalarySlip(){
+  try{
+    const built = await buildSalarySlipDoc();
+    if(!built) return;
+    built.doc.save(built.fname);
+    toast('சம்பள சீட்டு தயார் ஆனது ✅');
+  }catch(e){
+    console.error('PDF generation failed:', e);
+    toast('PDF உருவாக்கத்தில் பிழை: '+(e.message||e));
+  }
+}
+
+async function shareSalarySlipWhatsApp(){
+  try{
+    const built = await buildSalarySlipDoc();
+    if(!built) return;
+    const { doc, r, monthKey, fname } = built;
+    const blob = doc.output('blob');
+    const file = new File([blob], fname, {type:'application/pdf'});
+
+    if(navigator.canShare && navigator.canShare({files:[file]})){
+      // Web Share API: native "Share" sheet திறக்கும், அதில் WhatsApp தேர்ந்தெடுக்கலாம்
+      await navigator.share({
+        files: [file],
+        title: 'சம்பள சீட்டு',
+        text: `${r.staff.name||''} — ${monthKey} சம்பள சீட்டு — நிகர சம்பளம்: ${fmtMoney(r.net)}`
+      });
+    } else {
+      // File-share support ஆகாத Browser-கள்-க்கு fallback: PDF Download ஆகும்
+      // + WhatsApp text message (manual-ஆ attach பண்ணிக்கணும்)
+      doc.save(fname);
+      toast('இந்த Browser-ல் நேரடி Share Support ஆகல — PDF Download ஆகிடுச்சு, WhatsApp-ல் Manual-ஆ Attach பண்ணுங்க');
+      const waText = encodeURIComponent(`${r.staff.name||''} — ${monthKey} சம்பள சீட்டு — நிகர சம்பளம்: ${fmtMoney(r.net)}`);
+      window.open(`https://wa.me/?text=${waText}`, '_blank');
+    }
+  }catch(e){
+    if(e.name === 'AbortError') return; // பயனர் Share sheet-ஐ Cancel பண்ணது — பிழை இல்ல
+    console.error('WhatsApp share failed:', e);
+    if(e.name === 'NotAllowedError'){
+      toast('Share உடனே ஆகல — PDF Download ஆகுது, WhatsApp-ல் Manual-ஆ Attach பண்ணுங்க');
+      try{
+        const built = await buildSalarySlipDoc();
+        if(built) built.doc.save(built.fname);
+      }catch(e2){ /* ignore */ }
+    } else {
+      toast('Share பண்ண முடியல: '+(e.message||e));
+    }
+  }
+}
+
+/* =====================================================================
+   SETTINGS  (table: shop_settings, storage bucket: staff-media)
+===================================================================== */
+function captureShopLocation(){
+  if(!navigator.geolocation){ toast('இந்த Device-ல் GPS support ஆகல'); return; }
+  toast('கடையின் Location கண்டுபிடிக்கப்படுகிறது...');
+  navigator.geolocation.getCurrentPosition(
+    pos=>{
+      const lat = pos.coords.latitude, lng = pos.coords.longitude;
+      document.getElementById('setShopLat').value = lat;
+      document.getElementById('setShopLng').value = lng;
+      document.getElementById('setShopLocDisplay').textContent = `📍 Set ஆகியுள்ளது: ${lat.toFixed(5)}, ${lng.toFixed(5)} (இப்போ Save பண்ணுங்க)`;
+      toast('Location கிடைத்தது! கீழே "அமைப்புகளை சேமி" அழுத்துங்க');
+    },
+    err=>{ toast('Location கிடைக்கல: '+err.message); },
+    {timeout:8000, enableHighAccuracy:true}
+  );
+}
+async function saveSettings(){
+  const logoFile = document.getElementById('setLogoFile').files[0];
+  const latVal = document.getElementById('setShopLat').value;
+  const lngVal = document.getElementById('setShopLng').value;
+  const patch = {
+    owner_id: currentUser.id,
+    shop_name: document.getElementById('setShopName').value.trim() || 'என் கடை',
+    shop_address: document.getElementById('setShopAddress').value.trim(),
+    gst: document.getElementById('setGST').value.trim(),
+    phone: document.getElementById('setPhone').value.trim(),
+    working_days: Number(document.getElementById('setWorkingDays').value||26),
+    shift_start: document.getElementById('setShiftStart').value,
+    late_grace: Number(document.getElementById('setLateGrace').value||15),
+    late_deduction: Number(document.getElementById('setLateDeduction').value||50),
+    pf_enabled: document.getElementById('setPFEnabled').checked,
+    esi_enabled: document.getElementById('setESIEnabled').checked,
+    paid_leave: document.getElementById('setPaidLeave').checked,
+    shop_lat: latVal ? Number(latVal) : null,
+    shop_lng: lngVal ? Number(lngVal) : null,
+    gps_radius: Number(document.getElementById('setGpsRadius').value||50),
+    updated_at: new Date().toISOString()
+  };
+  try{
+    if(logoFile){
+      const path = `${currentUser.id}/logo.jpg`;
+      const { error: upErr } = await sb.storage.from('staff-media').upload(path, logoFile, {upsert:true});
+      if(upErr) throw upErr;
+      const { data: pub } = sb.storage.from('staff-media').getPublicUrl(path);
+      patch.logo_url = pub.publicUrl;
+    }
+    const { error } = await sb.from('shop_settings').upsert(patch);
+    if(error) throw error;
+    toast('அமைப்புகள் சேமிக்கப்பட்டன ✅');
+  }catch(e){ toast('பிழை: '+(e.message||e)); }
+}
+
+/* =====================================================================
+   CSV EXPORT (simple monthly report)
+===================================================================== */
+function exportMonthCSV(){
+  const mKey = new Date().toISOString().slice(0,7);
+  let csv = 'EmployeeID,Name,Present,HalfDay,Absent,Late,NetSalary\n';
+  Object.keys(staffCache).forEach(staffId=>{
+    const r = computeSalary(staffId, mKey);
+    if(!r) return;
+    csv += `${r.staff.empId||staffId},${r.staff.name},${r.present},${r.halfDay},${r.absentDays},${r.lateDays},${Math.round(r.net)}\n`;
+  });
+  // \uFEFF (UTF-8 BOM) சேர்க்கிறோம் — இது இல்லாம Excel/Google Sheets Tamil
+  // எழுத்துகளை தவறா படித்து garbled-ஆ (mojibake) காட்டிடும்.
+  const blob = new Blob(['\uFEFF' + csv], {type:'text/csv;charset=utf-8;'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `Report_${mKey}.csv`;
+  a.click();
+}
+
+/* =====================================================================
+   INIT
+===================================================================== */
+function haptic(ms){
+  // Vibration API — Android Chrome-ல் installed App இல்லாமலே வேலை செய்யும்.
+  // iOS Safari support பண்ணாது, அதனால் try/catch-ல் silently skip ஆகும்.
+  try{ if(navigator.vibrate) navigator.vibrate(ms||12); }catch(e){}
+}
+
+/* Pull-to-refresh (Owner dashboard) */
+(function setupPullToRefresh(){
+  const main = document.getElementById('mainScroll');
+  const indicator = document.getElementById('ptrIndicator');
+  if(!main || !indicator) return;
+  let startY = 0, pulling = false, dy = 0;
+
+  main.addEventListener('touchstart', (e)=>{
+    if(main.scrollTop <= 0){ startY = e.touches[0].clientY; pulling = true; dy = 0; }
+  }, {passive:true});
+
+  main.addEventListener('touchmove', (e)=>{
+    if(!pulling) return;
+    dy = e.touches[0].clientY - startY;
+    if(dy > 0 && main.scrollTop <= 0){ indicator.style.height = Math.min(dy/2, 60)+'px'; }
+  }, {passive:true});
+
+  main.addEventListener('touchend', async ()=>{
+    if(!pulling) return;
+    pulling = false;
+    const wasPulled = dy > 80;
+    indicator.style.height = '0px';
+    if(wasPulled && currentUser){
+      haptic(15);
+      toast('புதுப்பிக்கப்படுகிறது...');
+      await bootstrapShopData();
+    }
+  }, {passive:true});
+})();
+
+/* Pull-to-refresh (Staff screen) */
+(function setupStaffPullToRefresh(){
+  const main = document.getElementById('staffMainScroll');
+  const indicator = document.getElementById('staffPtrIndicator');
+  if(!main || !indicator) return;
+  let startY = 0, pulling = false, dy = 0;
+
+  main.addEventListener('touchstart', (e)=>{
+    if(main.scrollTop <= 0){ startY = e.touches[0].clientY; pulling = true; dy = 0; }
+  }, {passive:true});
+
+  main.addEventListener('touchmove', (e)=>{
+    if(!pulling) return;
+    dy = e.touches[0].clientY - startY;
+    if(dy > 0 && main.scrollTop <= 0){ indicator.style.height = Math.min(dy/2, 60)+'px'; }
+  }, {passive:true});
+
+  main.addEventListener('touchend', async ()=>{
+    if(!pulling) return;
+    pulling = false;
+    const wasPulled = dy > 80;
+    indicator.style.height = '0px';
+    if(wasPulled && staffSession){
+      haptic(15);
+      await refreshStaffAllData(true);
+    }
+  }, {passive:true});
+})();
+
+updateThemeIcon(document.documentElement.getAttribute('data-theme') === 'dark');
+applyLang();
+loadStaffSessionOnStart();
+
+/* =====================================================================
+   PWA: Service Worker + "Install App" prompt
+===================================================================== */
+if('serviceWorker' in navigator){
+  window.addEventListener('load', ()=>{
+    navigator.serviceWorker.register('sw.js').catch(err=>console.warn('SW register failed:', err));
+  });
+}
+let deferredInstallPrompt = null;
+window.addEventListener('beforeinstallprompt', (e)=>{
+  e.preventDefault();
+  deferredInstallPrompt = e;
+  document.querySelectorAll('.install-app-btn').forEach(btn=> btn.style.display = 'block');
+});
+async function installApp(){
+  if(!deferredInstallPrompt){
+    toast('App ஏற்கனவே Install ஆகியிருக்கலாம், அல்லது இந்த Browser Install-ஐ Support பண்ணல');
+    return;
+  }
+  deferredInstallPrompt.prompt();
+  const choice = await deferredInstallPrompt.userChoice;
+  deferredInstallPrompt = null;
+  document.querySelectorAll('.install-app-btn').forEach(btn=> btn.style.display = 'none');
+  if(choice.outcome === 'accepted') toast('App Install ஆகிறது ✅');
+}
+window.addEventListener('appinstalled', ()=>{
+  toast('App Home Screen-ல் Install ஆகிவிட்டது 🎉');
+  document.querySelectorAll('.install-app-btn').forEach(btn=> btn.style.display = 'none');
+});
+</script>
+</body>
+</html>
